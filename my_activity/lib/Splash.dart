@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_activity/NavBar.dart';
-import 'package:my_activity/Sales/Home/NavBarS.dart';
+import 'package:my_activity/Auth/Login.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -11,14 +10,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToNav();
+    _navigateToLogin();
   }
 
-  _navigateToNav() async {
+  _navigateToLogin() async {
     await Future.delayed(Duration(seconds: 3), () {});
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => NavBar()),
+      MaterialPageRoute(builder: (context) => LoginPage()),
     );
   }
 

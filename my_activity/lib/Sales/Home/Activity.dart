@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class Activity extends StatefulWidget {
+  const Activity({super.key});
+
   @override
   _ActivityState createState() => _ActivityState();
 }
@@ -47,7 +49,7 @@ class _ActivityState extends State<Activity> {
                       _focusedDay = focusedDay;
                     });
                   },
-                  calendarStyle: CalendarStyle(
+                  calendarStyle: const CalendarStyle(
                     todayDecoration: BoxDecoration(
                       color: Colors.orange,
                       shape: BoxShape.circle,
@@ -56,13 +58,13 @@ class _ActivityState extends State<Activity> {
                       color: Colors.red,
                       shape: BoxShape.circle,
                     ),
-                    defaultTextStyle: const TextStyle(fontSize: 12),
-                    weekendTextStyle: const TextStyle(fontSize: 12),
-                    outsideTextStyle: const TextStyle(fontSize: 10, color: Colors.grey),
+                    defaultTextStyle: TextStyle(fontSize: 12),
+                    weekendTextStyle: TextStyle(fontSize: 12),
+                    outsideTextStyle: TextStyle(fontSize: 10, color: Colors.grey),
                   ),
-                  daysOfWeekStyle: DaysOfWeekStyle(
-                    weekdayStyle: const TextStyle(fontSize: 12),
-                    weekendStyle: const TextStyle(fontSize: 12),
+                  daysOfWeekStyle: const DaysOfWeekStyle(
+                    weekdayStyle: TextStyle(fontSize: 12),
+                    weekendStyle: TextStyle(fontSize: 12),
                   ),
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
@@ -89,20 +91,20 @@ class _ActivityState extends State<Activity> {
                 'Call:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              ListTile(
-                leading: const Icon(Icons.phone, color: Colors.blue),
-                title: const Text('Teguh'),
-                subtitle: const Text('15:30'),
+              const ListTile(
+                leading: Icon(Icons.phone, color: Colors.blue),
+                title: Text('Teguh'),
+                subtitle: Text('15:30'),
               ),
               const SizedBox(height: 10),
               const Text(
                 'Meet:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              ListTile(
-                leading: const Icon(Icons.location_on, color: Colors.blue),
-                title: const Text('Agus'),
-                subtitle: const Text('15:30'),
+              const ListTile(
+                leading: Icon(Icons.location_on, color: Colors.blue),
+                title: Text('Agus'),
+                subtitle: Text('15:30'),
               ),
             ],
           ),

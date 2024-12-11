@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class CreatePost extends StatelessWidget {
   final TextEditingController _descriptionController = TextEditingController();
 
+  CreatePost({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,8 +40,8 @@ class CreatePost extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Create Post',
                   style: TextStyle(
                     color: Colors.black,
@@ -50,7 +52,7 @@ class CreatePost extends StatelessWidget {
               ],
             ),
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -65,7 +67,7 @@ class CreatePost extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         CircleAvatar(
                           backgroundImage: AssetImage('assets/user_avatar.png'),
@@ -84,11 +86,11 @@ class CreatePost extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _descriptionController,
                       maxLines: 4,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Type your description here...',
                         border: InputBorder.none,
                       ),
@@ -116,7 +118,7 @@ class CreatePost extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Post Now',
                       style: TextStyle(
                         fontFamily: 'Poppins',

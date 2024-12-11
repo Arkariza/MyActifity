@@ -7,6 +7,8 @@ import 'package:my_activity/Sales/Home/LeadList.dart';
 import 'package:my_activity/Sales/Home/Profile.dart';
 
 class NavBars extends StatefulWidget {
+  const NavBars({super.key});
+
   @override
   _NavBarState createState() => _NavBarState();
 }
@@ -15,11 +17,11 @@ class _NavBarState extends State<NavBars> {
   int _pageIndex = 0;
 
   final List<Widget> _pages = [
-    HomeScreen(),
-    Dashboard(),
-    LeadList(),
-    Activity(),
-    Profile(),
+    const HomeScreen(),
+    const Dashboard(),
+    const LeadList(),
+    const Activity(),
+    const Profile(),
   ];
 
   @override
@@ -27,7 +29,7 @@ class _NavBarState extends State<NavBars> {
     return Scaffold(
       body: _pages[_pageIndex],
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(
               color: Colors.blue, 
@@ -37,7 +39,7 @@ class _NavBarState extends State<NavBars> {
         ),
         child: CurvedNavigationBar(
           index: _pageIndex,
-          items: <Widget>[
+          items: const <Widget>[
             Icon(Icons.home, size: 30),
             Icon(Icons.dashboard, size: 30),
             Icon(Icons.contacts_outlined, size: 30),
@@ -48,7 +50,7 @@ class _NavBarState extends State<NavBars> {
           buttonBackgroundColor: Colors.white,
           backgroundColor: Colors.blue,
           animationCurve: Curves.easeInOut,
-          animationDuration: Duration(milliseconds: 300),
+          animationDuration: const Duration(milliseconds: 300),
           onTap: (index) {
             setState(() {
               _pageIndex = index;

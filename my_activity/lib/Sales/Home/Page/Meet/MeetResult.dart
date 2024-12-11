@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: MeetResult(),
     );
   }
 }
 
 class MeetResult extends StatefulWidget {
+  const MeetResult({super.key});
+
   @override
   State<MeetResult> createState() => _MeetResultState();
 }
@@ -61,8 +65,8 @@ class _MeetResultState extends State<MeetResult> {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Meet Result',
                   style: TextStyle(
                     color: Colors.black,
@@ -72,11 +76,11 @@ class _MeetResultState extends State<MeetResult> {
                 ),
               ]
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Expanded(
               child: Center(
                 child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   width: MediaQuery.of(context).size.width * 0.8,
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -86,7 +90,7 @@ class _MeetResultState extends State<MeetResult> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
+                      const Text(
                         'Meet Results',
                         style: TextStyle(
                           fontFamily: 'Poppins',
@@ -94,10 +98,10 @@ class _MeetResultState extends State<MeetResult> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                     SizedBox(height: 15),
+                     const SizedBox(height: 15),
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Opacity(
+                          prefixIcon: const Opacity(
                             opacity: 0.5,
                             child: Icon(Icons.location_on),
                           ),
@@ -105,21 +109,21 @@ class _MeetResultState extends State<MeetResult> {
                           fillColor: Colors.white,
                           hintText: 'Address',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: UnderlineInputBorder(
+                          border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                         ),
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Opacity(
+                          prefixIcon: const Opacity(
                             opacity: 0.5,
                             child: Icon(Icons.phone),
                           ),
@@ -127,21 +131,21 @@ class _MeetResultState extends State<MeetResult> {
                           fillColor: Colors.white,
                           hintText: 'Phone Number',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: UnderlineInputBorder(
+                          border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                         ),
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       DropdownButtonFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Opacity(
+                          prefixIcon: const Opacity(
                             opacity: 0.5,
                             child: Icon(Icons.bar_chart_sharp),
                           ),
@@ -149,20 +153,20 @@ class _MeetResultState extends State<MeetResult> {
                           fillColor: Colors.white,
                           hintText: 'Prospect Status',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: UnderlineInputBorder(
+                          border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                         ),
                         value: selectedStatus,
                         onChanged: (value) {
                           setState(() {
-                            selectedStatus = value as String?;
+                            selectedStatus = value;
                           });
                         },
                         items: prospectStatuses.map((status) {
@@ -172,10 +176,10 @@ class _MeetResultState extends State<MeetResult> {
                           );
                         }).toList(),
                       ),
-                       SizedBox(height: 15),
+                       const SizedBox(height: 15),
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Opacity(
+                          prefixIcon: const Opacity(
                             opacity: 0.5,
                             child: Icon(Icons.note),
                           ),
@@ -183,28 +187,28 @@ class _MeetResultState extends State<MeetResult> {
                           fillColor: Colors.white,
                           hintText: 'Note',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: UnderlineInputBorder(
+                          border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
-                          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Save',
                           style: TextStyle(
                             fontFamily: 'Poppins',

@@ -28,7 +28,7 @@ class PendingPage extends StatelessWidget {
                           BoxShadow(
                             color: Colors.black.withOpacity(0.3),
                             blurRadius: 4,
-                            offset: Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),

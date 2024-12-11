@@ -37,8 +37,8 @@ class PendingDetail extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Pending Detail',
                   style: TextStyle(
                     color: Colors.black,

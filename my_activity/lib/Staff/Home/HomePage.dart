@@ -18,7 +18,7 @@ class HomePageStaff extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
+                const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -50,32 +50,32 @@ class HomePageStaff extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Container(
               height: 250,
               color: Colors.grey[200],
-              child: Center(
+              child: const Center(
                 child: Text('Chart In Here'),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatCard(
-                    context, Icons.person, "OPEN", "6", Colors.orange, OpenLead()),
+                    context, Icons.person, "OPEN", "6", Colors.orange, const OpenLead()),
                 _buildStatCard(
                     context, Icons.bar_chart, "ON PROGRESS", "6", Colors.blue, OnProgres()),
               ],
             ),
-            SizedBox(height: 35),
+            const SizedBox(height: 35),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatCard(
-                    context, Icons.pending, "PENDING", "6", Colors.green, PendingPage()),
+                    context, Icons.pending, "PENDING", "6", Colors.green, const PendingPage()),
                 _buildStatCard(
-                    context, Icons.attach_money, "WIN/LOSE", "5:1", Colors.purple, WinLosePage()),
+                    context, Icons.attach_money, "WIN/LOSE", "5:1", Colors.purple, const WinLosePage()),
               ],
             ),
           ],
@@ -95,7 +95,7 @@ class HomePageStaff extends StatelessWidget {
       child: Container(
         width: 165,
         height: 65,
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(100),
@@ -103,29 +103,29 @@ class HomePageStaff extends StatelessWidget {
             BoxShadow(
               color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.3),
               blurRadius: 5,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
         child: Row(
           children: [
             Icon(icon, size: 35, color: color),
-            SizedBox(width: 5),
+            const SizedBox(width: 5),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.normal,
                   ),

@@ -16,9 +16,11 @@ class OnProgres extends StatelessWidget {
     {"name": "Aisyah September", "progress": 0.70, "image": "assets/user6.png"},
   ];
 
+  OnProgres({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(  
       body: Column(
         children: [
           Container(
@@ -38,7 +40,7 @@ class OnProgres extends StatelessWidget {
                         BoxShadow(
                           color: Colors.black.withOpacity(0.3),
                           blurRadius: 4,
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -87,7 +89,7 @@ class LeadCard extends StatelessWidget {
   final String imagePath;
   final bool verified;
 
-  const LeadCard({
+  const LeadCard({super.key, 
     required this.name,
     required this.progress,
     required this.imagePath,
@@ -106,7 +108,7 @@ class LeadCard extends StatelessWidget {
             BoxShadow(
               color: Colors.black.withOpacity(0.3),
               blurRadius: 4,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -133,7 +135,7 @@ class LeadCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               name,
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           if (verified)
@@ -145,11 +147,11 @@ class LeadCard extends StatelessWidget {
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.3),
                                     blurRadius: 4,
-                                    offset: Offset(0, 4),
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.verified,
                                 color: Colors.blue,
                                 size: 20,
@@ -163,7 +165,7 @@ class LeadCard extends StatelessWidget {
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       LinearPercentIndicator(
-                        barRadius: Radius.circular(10),
+                        barRadius: const Radius.circular(10),
                         lineHeight: 15.0,
                         percent: progress,
                         backgroundColor: Colors.grey.shade300,

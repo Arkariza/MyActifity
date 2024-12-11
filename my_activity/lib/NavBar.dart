@@ -5,6 +5,8 @@ import 'package:my_activity/Staff/Home/DetailPage.dart';
 import 'package:my_activity/Staff/Home/HomePage.dart';
 
 class NavBar extends StatefulWidget {
+  const NavBar({super.key});
+
   @override
   _NavBarState createState() => _NavBarState();
 }
@@ -13,9 +15,9 @@ class _NavBarState extends State<NavBar> {
   int _pageIndex = 0;
 
   final List<Widget> _pages = [
-    HomePageStaff(),
-    AddRefeal(),
-    DetailPage(),
+    const HomePageStaff(),
+    const AddRefeal(),
+    const DetailPage(),
   ];
 
   @override
@@ -23,7 +25,7 @@ class _NavBarState extends State<NavBar> {
     return Scaffold(
       body: _pages[_pageIndex],
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(
               color: Colors.blue, 
@@ -33,7 +35,7 @@ class _NavBarState extends State<NavBar> {
         ),
         child: CurvedNavigationBar(
           index: _pageIndex,
-          items: <Widget>[
+          items: const <Widget>[
             Icon(Icons.home, size: 30),
             Icon(Icons.person_add, size: 30),
             Icon(Icons.person, size: 30),
@@ -42,7 +44,7 @@ class _NavBarState extends State<NavBar> {
           buttonBackgroundColor: Colors.white,
           backgroundColor: Colors.blue,
           animationCurve: Curves.easeInOut,
-          animationDuration: Duration(milliseconds: 300),
+          animationDuration: const Duration(milliseconds: 300),
           onTap: (index) {
             setState(() {
               _pageIndex = index;

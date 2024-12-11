@@ -12,11 +12,11 @@ class Dashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.only(left: 15, right: 15, top: 35),
+        padding: const EdgeInsets.only(left: 15, right: 15, top: 35),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Dashboard",
               style: TextStyle(
                 fontFamily: "Poppins",
@@ -24,8 +24,8 @@ class Dashboard extends StatelessWidget {
                 fontSize: 20,
               ),
             ),
-            SizedBox(height: 35),
-            Text(
+            const SizedBox(height: 35),
+            const Text(
               "Sales Activity",
               style: TextStyle(
                 fontFamily: "Poppins",
@@ -34,7 +34,7 @@ class Dashboard extends StatelessWidget {
                 color: Colors.grey,
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
            Row(
   mainAxisAlignment: MainAxisAlignment.spaceBetween,
   children: [
@@ -49,18 +49,18 @@ class Dashboard extends StatelessWidget {
         firstButtonAction: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CallDate()),
+            MaterialPageRoute(builder: (context) => const CallDate()),
           );
         },
         secondButtonAction: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddCall()),
+            MaterialPageRoute(builder: (context) => const AddCall()),
           );
         },
       ),
     ),
-    SizedBox(width: 10),
+    const SizedBox(width: 10),
     Flexible(
       child: _buildActivityCard(
         context: context,
@@ -72,20 +72,20 @@ class Dashboard extends StatelessWidget {
         firstButtonAction: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => MeetDate()),
+            MaterialPageRoute(builder: (context) => const MeetDate()),
           );
         },
         secondButtonAction: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddMeet()),
+            MaterialPageRoute(builder: (context) => const AddMeet()),
           );
         },
       ),
     ),
   ],
 ),
-SizedBox(height: 15),
+const SizedBox(height: 15),
 Row(
   mainAxisAlignment: MainAxisAlignment.spaceBetween,
   children: [
@@ -96,12 +96,12 @@ Row(
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CallDate()),
+            MaterialPageRoute(builder: (context) => const CallDate()),
           );
         },
       ),
     ),
-    SizedBox(width: 10),
+    const SizedBox(width: 10),
     Flexible(
       child: _buildDateButton(
         icon: Icons.calendar_today,
@@ -109,14 +109,14 @@ Row(
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => MeetDate()),
+            MaterialPageRoute(builder: (context) => const MeetDate()),
           );
         },
       ),
     ),
   ],
 ),
-            SizedBox(height: 35),
+            const SizedBox(height: 35),
             Expanded(
               child: SingleChildScrollView(
                 child: _buildTeamSalesSection(context),
@@ -147,7 +147,7 @@ Row(
         BoxShadow(
           color: Colors.grey.withOpacity(0.2),
           blurRadius: 5,
-          offset: Offset(0, 2),
+          offset: const Offset(0, 2),
         ),
       ],
     ),
@@ -159,21 +159,21 @@ Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Icon(icon, size: 30, color: Colors.blue), 
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14, 
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   "$count",
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20, 
                     fontWeight: FontWeight.bold,
                   ),
@@ -182,7 +182,7 @@ Row(
             ),
           ],
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -190,15 +190,15 @@ Row(
               onTap: firstButtonAction,
               child: Text(
                 firstButtonText,
-                style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w600),
+                style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w600),
               ),
             ),
-            SizedBox(width: 16), 
+            const SizedBox(width: 16), 
             GestureDetector(
               onTap: secondButtonAction,
               child: Text(
                 secondButtonText,
-                style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w600),
+                style: const TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -218,7 +218,7 @@ Row(
       child: Container(
         width: 178,
         height: 65,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(8),
@@ -228,10 +228,10 @@ Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: Colors.blue, size: 20),
-            SizedBox(width: 5),
+            const SizedBox(width: 5),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: "Poppins",
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -248,7 +248,7 @@ Row(
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           "Team Sales By Stage",
           style: TextStyle(
             fontFamily: "Poppins",
@@ -257,7 +257,7 @@ Row(
             color: Colors.grey,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         _buildTeamRow(context, "Team Sales A"),
         _buildTeamRow(context, "Team Sales B"),
         _buildTeamRow(context, "Team Sales C"),
@@ -269,23 +269,23 @@ Row(
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      SizedBox(height: 10),
+      const SizedBox(height: 10),
       Text(
         teamName,
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: "Poppins",
           fontWeight: FontWeight.bold,
           fontSize: 15,
         ),
       ),
-      SizedBox(height: 5),
+      const SizedBox(height: 5),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildSalesStageBox(context, "Open", Colors.blue, 5, width: 60, height: 70),
           _buildSalesStageBox(context, "Meet", Colors.blue, 5, width: 60, height: 70),
           _buildSalesStageBox(context, "Pending", Colors.blue, 5, width: 60, height: 70),
-          _buildSalesStageBox(context, "Win", Color.fromARGB(255, 77, 221, 182), 5, isSpecial: true, width: 60, height: 70),
+          _buildSalesStageBox(context, "Win", const Color.fromARGB(255, 77, 221, 182), 5, isSpecial: true, width: 60, height: 70),
           _buildSalesStageBox(context, "Lose", const Color.fromARGB(255, 202, 48, 51), 5, isSpecial: true, width: 60, height: 70),
         ],
       ),
@@ -308,7 +308,7 @@ Widget _buildSalesStageBox(
           ? () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Pendingassigment()),
+                MaterialPageRoute(builder: (context) => const Pendingassigment()),
               );
             }
           : null,
@@ -317,7 +317,7 @@ Widget _buildSalesStageBox(
         height: height, 
         decoration: BoxDecoration(
           color: isSpecial ? color : Colors.white,
-          border: isSpecial ? Border() : Border.all(color: Colors.black),
+          border: isSpecial ? const Border() : Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -332,7 +332,7 @@ Widget _buildSalesStageBox(
                 color: isSpecial ? Colors.white : Colors.black,
               ),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Text(
               "$count",
               style: TextStyle(

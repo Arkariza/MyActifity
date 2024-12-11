@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class AddNewLead extends StatelessWidget {
   const AddNewLead({super.key});
 
@@ -37,8 +38,8 @@ class AddNewLead extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Add New Lead',
                   style: TextStyle(
                     color: Colors.black,
@@ -94,7 +95,7 @@ class AddNewLead extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  PriorityDropdown(),
+                  const PriorityDropdown(),
                   const SizedBox(height: 10),
                   const TextField(
                     decoration: InputDecoration(
@@ -140,6 +141,8 @@ class AddNewLead extends StatelessWidget {
 }
 
 class PriorityDropdown extends StatefulWidget {
+  const PriorityDropdown({super.key});
+
   @override
   _PriorityDropdownState createState() => _PriorityDropdownState();
 }

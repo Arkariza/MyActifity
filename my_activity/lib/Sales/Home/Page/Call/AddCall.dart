@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: AddCall(),
     );
   }
 }
 
 class AddCall extends StatelessWidget {
+  const AddCall({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,8 +51,8 @@ class AddCall extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Add Call',
                   style: TextStyle(
                     color: Colors.black,
@@ -58,11 +62,11 @@ class AddCall extends StatelessWidget {
                 ),
               ]
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Expanded(
               child: Center(
                 child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   width: MediaQuery.of(context).size.width * 0.8,
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -72,7 +76,7 @@ class AddCall extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
+                      const Text(
                         'Add Call',
                         style: TextStyle(
                           fontFamily: 'Poppins',
@@ -80,10 +84,10 @@ class AddCall extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Opacity(
+                          prefixIcon: const Opacity(
                             opacity: 0.5,
                             child: Icon(Icons.person),
                           ),
@@ -91,21 +95,21 @@ class AddCall extends StatelessWidget {
                           fillColor: Colors.white,
                           hintText: 'Client Name',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: UnderlineInputBorder(
+                          border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                         ),
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Opacity(
+                          prefixIcon: const Opacity(
                             opacity: 0.5,
                             child: Icon(Icons.phone),
                           ),
@@ -113,21 +117,21 @@ class AddCall extends StatelessWidget {
                           fillColor: Colors.white,
                           hintText: 'Number Phone',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: UnderlineInputBorder(
+                          border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                         ),
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Opacity(
+                          prefixIcon: const Opacity(
                             opacity: 0.5,
                             child: Icon(Icons.note),
                           ),
@@ -135,28 +139,28 @@ class AddCall extends StatelessWidget {
                           fillColor: Colors.white,
                           hintText: 'Note',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: UnderlineInputBorder(
+                          border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          focusedBorder: UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
-                          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Add Call',
                           style: TextStyle(
                             fontFamily: 'Poppins',

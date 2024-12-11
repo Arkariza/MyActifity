@@ -39,8 +39,8 @@ class Pendingassigment extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Pending Assigment',
                   style: TextStyle(
                     color: Colors.black,
@@ -67,7 +67,7 @@ class Pendingassigment extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            CircleAvatar(
+                            const CircleAvatar(
                               radius: 40,
                               backgroundImage: NetworkImage(
                                 "https://i.pinimg.com/564x/52/37/72/523772ab916ac47807d33e13a565c900.jpg",
@@ -128,7 +128,7 @@ class Pendingassigment extends StatelessWidget {
                                         onPressed: () {
                                           Navigator.push(
                                             context,
-                                            MaterialPageRoute(builder: (context) => PendingDetail()),
+                                            MaterialPageRoute(builder: (context) => const PendingDetail()),
                                           );
                                         },
                                         child: const Text(

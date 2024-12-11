@@ -41,8 +41,8 @@ class LeadDetail extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Lead Detail',
                   style: TextStyle(
                     color: Colors.black,
@@ -53,16 +53,16 @@ class LeadDetail extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            Column(
+            const Column(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 65,
                   backgroundImage: NetworkImage(
                     'https://i.pinimg.com/564x/61/fd/15/61fd15e4ad47d703dc4cdcb05d26b298.jpg',
                   ),
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                SizedBox(height: 16),
+                Text(
                   "Jhon",
                   style: TextStyle(
                     fontFamily: "Poppins",
@@ -115,10 +115,10 @@ class LeadDetail extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Column(
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "Phone Number:",
                         style: TextStyle(
                           color: Colors.grey,
@@ -127,7 +127,7 @@ class LeadDetail extends StatelessWidget {
                           fontSize: 11,
                         ),
                       ),
-                      const Text(
+                      Text(
                         "+62 YYY-XXX-XXXX",
                         style: TextStyle(
                           color: Colors.black,
@@ -136,8 +136,8 @@ class LeadDetail extends StatelessWidget {
                           fontSize: 11,
                         ),
                       ),
-                      const SizedBox(height: 5),
-                      const Text(
+                      SizedBox(height: 5),
+                      Text(
                         "Number Policy:",
                         style: TextStyle(
                           color: Colors.grey,
@@ -146,7 +146,7 @@ class LeadDetail extends StatelessWidget {
                           fontSize: 11,
                         ),
                       ),
-                      const Text(
+                      Text(
                         "5556665556665566",
                         style: TextStyle(
                           color: Colors.black,
@@ -155,7 +155,7 @@ class LeadDetail extends StatelessWidget {
                           fontSize: 11,
                         ),
                       ),
-                      const SizedBox(height: 15),
+                      SizedBox(height: 15),
                     ],
                   ),
                   Row(
@@ -201,7 +201,7 @@ class LeadDetail extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => ActivityHistory()),
+                              MaterialPageRoute(builder: (context) => const ActivityHistory()),
                             );
                           },
                           icon: const Icon(Icons.arrow_forward_ios),

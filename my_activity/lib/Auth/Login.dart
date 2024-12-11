@@ -44,10 +44,10 @@ class _LoginPageState extends State<LoginPage> {
     print('Navigating with role: $role');
 
     Widget targetPage;
-    if (role == 1) {
-      targetPage = NavBar();
-    } else if (role == 2) {
-      targetPage = NavBars();
+    if (role == 2) {
+      targetPage = const NavBar();
+    } else if (role == 1) {
+      targetPage = const NavBars();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -120,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
             _handleNavigation(context, role);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text('Invalid role received: role is null'),
                 backgroundColor: Colors.red,
               ),

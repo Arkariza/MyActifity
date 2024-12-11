@@ -142,7 +142,7 @@ class _LeadListState extends State<LeadList> {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => AddNewLead(),
+                      builder: (context) => const AddNewLead(),
                     ),
                   );
                 },

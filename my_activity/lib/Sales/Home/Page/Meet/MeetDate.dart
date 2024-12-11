@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: MeetDate(),
     );
   }
 }
 
 class MeetDate extends StatelessWidget {
+  const MeetDate({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,8 +49,8 @@ class MeetDate extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Meet Date',
                   style: TextStyle(
                     color: Colors.black,
@@ -56,7 +60,7 @@ class MeetDate extends StatelessWidget {
                 ),
               ]
             ),
-            SizedBox(height: 55,),
+            const SizedBox(height: 55,),
             ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
@@ -64,9 +68,9 @@ class MeetDate extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               ),
-              child: Text(
+              child: const Text(
                 'Today',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -79,7 +83,7 @@ class MeetDate extends StatelessWidget {
             const SizedBox(height: 10),
             Expanded(
               child: ListView(
-                children: [
+                children: const [
                  ActivityTile(
                     icon: Icons.info_outline,
                     iconColor: Colors.blue,
@@ -130,7 +134,7 @@ class ActivityTile extends StatelessWidget {
   final String subtitle;
   final String? time;
 
-  const ActivityTile({
+  const ActivityTile({super.key, 
     required this.icon,
     required this.iconColor,
     required this.title,
@@ -141,7 +145,7 @@ class ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
+      margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.white,
@@ -150,7 +154,7 @@ class ActivityTile extends StatelessWidget {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -161,24 +165,24 @@ class ActivityTile extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.bold,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(fontFamily: 'Poppins'),
+          style: const TextStyle(fontFamily: 'Poppins'),
         ),
         trailing: time != null
             ? Text(
                 time!,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.bold,
                 ),
               )
-            : Icon(Icons.arrow_forward_ios),
+            : const Icon(Icons.arrow_forward_ios),
       ),
     );
   }

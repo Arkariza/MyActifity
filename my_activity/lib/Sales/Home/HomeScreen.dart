@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -17,10 +16,10 @@ class HomeScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16.0),
             color: Colors.white,
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'HOME',
                   style: TextStyle(
                     color: Colors.black,
@@ -29,7 +28,7 @@ class HomeScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const CircleAvatar(
+                CircleAvatar(
                   backgroundImage: NetworkImage(
                       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOw13N1quoQo_eK_UZMVNxAdfNcKge5HK94A&s'),
                 ),
@@ -171,7 +170,7 @@ class _StoryCardState extends State<StoryCard> {
                                   backgroundImage: NetworkImage(
                                       'https://example.com/user_avatar.jpg'),
                                 ),
-                                title: Text('User'),
+                                title: const Text('User'),
                                 subtitle: Text(comment),
                               ))
                           .toList(),
@@ -226,7 +225,7 @@ class _StoryCardState extends State<StoryCard> {
                   children: [
                     Text(widget.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                     Text(widget.time, style: const TextStyle(color: Colors.grey, fontSize: 10)),
-                    Container(
+                    SizedBox(
                       width: max(155, 200),
                       child: Text(widget.content),
                     ),
@@ -268,7 +267,7 @@ class _StoryCardState extends State<StoryCard> {
 class ImageSlider extends StatelessWidget {
   final bool isNetwork;
 
-  ImageSlider({required this.isNetwork});
+  ImageSlider({super.key, required this.isNetwork});
 
   final List<String> networkImages = [
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb6Rzo_PBz9RnBQ9KgAtcZ1rZsrPQq5bS5xw&s',

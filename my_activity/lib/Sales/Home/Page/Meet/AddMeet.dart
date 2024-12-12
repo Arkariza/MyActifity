@@ -33,6 +33,7 @@ class _AddMeetState extends State<AddMeet> {
 
   final TextEditingController _clientNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
   Future<void> _openMapsLocation() async {
@@ -65,6 +66,10 @@ class _AddMeetState extends State<AddMeet> {
       _showSnackBar('Please enter phone number');
       return;
     }
+    if (_addressController.text.isEmpty) {
+      _showSnackBar('Please enter the address');
+      return;
+    }
     if (_addressText == 'Address') {
       _showSnackBar('Please select location');
       return;
@@ -85,6 +90,7 @@ class _AddMeetState extends State<AddMeet> {
     final meetData = {
       'client_name': _clientNameController.text,
       'phone_num': _phoneNumberController.text,
+      'address':    _addressController.text,
       'latitude': _selectedLocation!.latitude,
       'longitude': _selectedLocation!.longitude,
       'note': _noteController.text,
@@ -129,6 +135,7 @@ class _AddMeetState extends State<AddMeet> {
   void _resetForm() {
     _clientNameController.clear();
     _phoneNumberController.clear();
+    _addressController.clear();
     _noteController.clear();
     setState(() {
       _addressText = 'Address';
@@ -257,6 +264,30 @@ class _AddMeetState extends State<AddMeet> {
                           ),
                         ),
                         const SizedBox(height: 15),
+                        TextFormField(
+                          controller: _addressController,
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            prefixIcon: const Opacity(
+                              opacity: 0.5,
+                              child: Icon(Icons.phone),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: 'Enter Your Address',
+                            hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
+                            border: const UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
+                            enabledBorder: const UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: const UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
                         ElevatedButton(
                           onPressed: _openMapsLocation,
                           style: ElevatedButton.styleFrom(
@@ -344,6 +375,7 @@ class _AddMeetState extends State<AddMeet> {
   void dispose() {
     _clientNameController.dispose();
     _phoneNumberController.dispose();
+    _addressController.dispose();
     _noteController.dispose();
     super.dispose();
   }

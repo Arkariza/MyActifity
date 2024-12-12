@@ -64,95 +64,85 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login() async {
-    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Username and password are required'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+  if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Username and password are required'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
 
-    setState(() => _isLoading = true);
+  setState(() => _isLoading = true);
 
-    try {
-      final url = Uri.parse('http://localhost:8080/api/login');
+  try {
+    final url = Uri.parse('http://localhost:8080/api/login');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'username': _usernameController.text,
+        'password': _passwordController.text,
+      }),
+    );
 
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'username': _usernameController.text,
-          'password': _passwordController.text,
-        }),
-      );
+    final responseData = LoginResponse.fromJson(json.decode(response.body));
+    if (response.statusCode == 200 && responseData.status) {
+      final prefs = await SharedPreferences.getInstance();
+      final token = responseData.data['access_token'];
+      final role = responseData.data['role'];
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      if (token != null) await prefs.setString('token', token);
+      if (role != null) await prefs.setInt('role', role);
 
-      final responseData = LoginResponse.fromJson(json.decode(response.body));
+      if (_rememberMe) {
+        await prefs.setString('username', _usernameController.text);
+      }
 
-      if (response.statusCode == 200 && responseData.status) {
-        final prefs = await SharedPreferences.getInstance();
-        final user = responseData.data['user'];
-        final token = responseData.data['access_token'];
-        final role = user['role'];
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseData.message)),
+        );
 
-        print('Token: $token');
-        print('Role: $role');
-
-        if (token != null) await prefs.setString('token', token);
-        if (role != null) await prefs.setInt('role', role);
-
-        if (_rememberMe) {
-          await prefs.setString('username', _usernameController.text);
-        }
-
-        if (mounted) {
+        if (role != null) {
+          _handleNavigation(context, role);
+        } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(responseData.message)),
-          );
-
-          if (role != null) {
-            _handleNavigation(context, role);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Invalid role received: role is null'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(responseData.message),
+            const SnackBar(
+              content: Text('Role is missing or null in response.'),
               backgroundColor: Colors.red,
             ),
           );
         }
       }
-    } catch (e) {
-      print('Error during login: $e');
+    } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(responseData.message),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    }
+  } catch (e) {
+    print('Error during login: $e');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } finally {
+    if (mounted) {
+      setState(() => _isLoading = false);
     }
   }
+}
+
 
   @override
   void initState() {

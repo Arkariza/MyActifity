@@ -101,7 +101,7 @@ class _AddMeetState extends State<AddMeet> {
         Uri.parse('http://localhost:8080/api/meets/add'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'JWT $token',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode(meetData),
       );
@@ -266,11 +266,11 @@ class _AddMeetState extends State<AddMeet> {
                         const SizedBox(height: 15),
                         TextFormField(
                           controller: _addressController,
-                          keyboardType: TextInputType.phone,
+                          keyboardType: TextInputType.text,
                           decoration: InputDecoration(
                             prefixIcon: const Opacity(
                               opacity: 0.5,
-                              child: Icon(Icons.phone),
+                              child: Icon(Icons.map),
                             ),
                             filled: true,
                             fillColor: Colors.white,

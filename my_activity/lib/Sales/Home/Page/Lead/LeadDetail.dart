@@ -3,11 +3,14 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:my_activity/Sales/Home/Page/ActifityHistory.dart';
 
 class LeadDetail extends StatelessWidget {
-  const LeadDetail({super.key, required String name, required String status});
+  final String name;
+  final String status;
+
+  const LeadDetail({super.key, required this.name, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    double progress = 0.5;
+    double progress = 0.05; // Progress diubah menjadi 0.05 (5%)
 
     return Scaffold(
       body: Padding(
@@ -53,21 +56,31 @@ class LeadDetail extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            const Column(
+            Column(
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 65,
                   backgroundImage: NetworkImage(
                     'https://i.pinimg.com/564x/61/fd/15/61fd15e4ad47d703dc4cdcb05d26b298.jpg',
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
-                  "Jhon",
-                  style: TextStyle(
+                  name,
+                  style: const TextStyle(
                     fontFamily: "Poppins",
                     fontWeight: FontWeight.normal,
                     fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  status,
+                  style: const TextStyle(
+                    fontFamily: "Poppins",
+                    fontWeight: FontWeight.w300,
+                    fontSize: 16,
+                    color: Colors.grey,
                   ),
                 ),
               ],
@@ -91,9 +104,9 @@ class LeadDetail extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    "Progress: 5%",
-                    style: TextStyle(
+                  Text(
+                    "Progress: ${(progress * 100).toInt()}%",
+                    style: const TextStyle(
                       color: Colors.grey,
                       fontWeight: FontWeight.normal,
                       fontFamily: "Poppins",
@@ -101,7 +114,6 @@ class LeadDetail extends StatelessWidget {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: LinearPercentIndicator(
@@ -165,19 +177,78 @@ class LeadDetail extends StatelessWidget {
                         icon: Icons.phone,
                         label: "Call",
                         color: Colors.red,
-                        onTap: () {},
+                        onTap: () {
+                          print("User memilih Call");
+                        },
                       ),
                       _buildButton(
                         icon: Icons.person,
                         label: "Meet",
                         color: Colors.blue,
-                        onTap: () {},
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text(
+                                  'Choose Meet Option',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16, // Ukuran font diperkecil
+                                  ),
+                                ),
+                                content: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: ListTile(
+                                        title: const Text(
+                                          'Meet Now',
+                                          style: TextStyle(fontFamily: 'Poppins'),
+                                        ),
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          print("User memilih Meet Now");
+                                        },
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: ListTile(
+                                        title: const Text(
+                                          'Meet Later',
+                                          style: TextStyle(fontFamily: 'Poppins'),
+                                        ),
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          print("User memilih Meet Later");
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text(
+                                      'Cancel',
+                                      style: TextStyle(fontFamily: 'Poppins'),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                       ),
                     ],
                   ),
                   const SizedBox(height: 15),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), 
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
@@ -185,23 +256,26 @@ class LeadDetail extends StatelessWidget {
                           color: Colors.grey.withOpacity(0.5),
                           spreadRadius: 2,
                           blurRadius: 5,
-                          offset: const Offset(0, 3), 
+                          offset: const Offset(0, 3),
                         ),
                       ],
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           "Activity Mentory",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.normal),
                         ),
                         IconButton(
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const ActivityHistory()),
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ActivityHistory()),
                             );
                           },
                           icon: const Icon(Icons.arrow_forward_ios),

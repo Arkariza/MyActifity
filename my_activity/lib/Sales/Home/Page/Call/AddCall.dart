@@ -29,7 +29,6 @@ class _AddCallState extends State<AddCall> {
   final TextEditingController _clientNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
-  DateTime? _selectedDate; 
 
   Future<void> _addCall() async {
     if (_clientNameController.text.isEmpty) {
@@ -54,14 +53,10 @@ class _AddCallState extends State<AddCall> {
     }
 
     final callData = {
-    'date': _selectedDate?.toIso8601String() ?? '',
-    'name': _clientNameController.text,
-    'time': '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}',
-    'type': 'Call',
+      'client_name': _clientNameController.text,
+      'phonenum': _phoneNumberController.text,
+      'note': _noteController.text
     };
-
-  await _saveToLocal(callData); // Simpan ke local storage
-
 
     try {
       final response = await http.post(
@@ -76,7 +71,7 @@ class _AddCallState extends State<AddCall> {
       if (response.statusCode == 200) {
         _showSnackBar('Call added successfully');
       } else {
-        _showSnackBar('Call Failed: ${response.reasonPhrase}');
+        _showSnackBar('Call Successfully: ${response.reasonPhrase}');
       }
     } catch (e) {
       _showSnackBar('An error occurred: $e');
@@ -87,27 +82,6 @@ class _AddCallState extends State<AddCall> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
-  }
-
-  Future<void> _saveToLocal(Map<String, String> callData) async {
-  final prefs = await SharedPreferences.getInstance();
-  List<String> activities = prefs.getStringList('activities') ?? [];
-  activities.add(jsonEncode(callData));
-  await prefs.setStringList('activities', activities);
-}
-
-  Future<void> _pickDate() async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (pickedDate != null && pickedDate != _selectedDate) {
-      setState(() {
-        _selectedDate = pickedDate;
-      });
-    }
   }
 
   @override
@@ -122,7 +96,7 @@ class _AddCallState extends State<AddCall> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context, true);
+                    Navigator.pop(context);
                   },
                   child: Container(
                     padding: const EdgeInsets.all(8),
@@ -188,7 +162,15 @@ class _AddCallState extends State<AddCall> {
                           fillColor: Colors.white,
                           hintText: 'Client Name',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: const UnderlineInputBorder(),
+                          border: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          enabledBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 15),
@@ -203,33 +185,17 @@ class _AddCallState extends State<AddCall> {
                           fillColor: Colors.white,
                           hintText: 'Phone Number',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: const UnderlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      InkWell(
-                          onTap: _pickDate,
-                          child: InputDecorator(
-                            decoration: const InputDecoration(
-                              prefixIcon: Opacity(
-                                opacity: 0.5,
-                                child: Icon(Icons.calendar_today),
-                              ),
-                              hintText: 'Select Date',
-                              border: UnderlineInputBorder(),
-                            ),
-                            child: Text(
-                              _selectedDate == null
-                                  ? 'Choose a date'
-                                  : '${_selectedDate!.toLocal()}'.split(' ')[0],
-                              style: TextStyle(
-                                color: _selectedDate == null
-                                    ? Colors.black.withOpacity(0.5)
-                                    : Colors.black,
-                              ),
-                            ),
+                          border: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          enabledBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue),
                           ),
                         ),
+                      ),
                       const SizedBox(height: 15),
                       TextFormField(
                         controller: _noteController,
@@ -242,7 +208,15 @@ class _AddCallState extends State<AddCall> {
                           fillColor: Colors.white,
                           hintText: 'Note',
                           hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
-                          border: const UnderlineInputBorder(),
+                          border: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          enabledBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),

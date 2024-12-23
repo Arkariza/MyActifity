@@ -10,7 +10,7 @@ class LeadDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double progress = 0.05; // Progress diubah menjadi 0.05 (5%)
+    double progress = 0.05;
 
     return Scaffold(
       body: Padding(
@@ -195,7 +195,7 @@ class LeadDetail extends StatelessWidget {
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16, // Ukuran font diperkecil
+                                    fontSize: 16,
                                   ),
                                 ),
                                 content: Row(

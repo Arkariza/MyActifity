@@ -1,13 +1,11 @@
-import 'dart:math';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:http/http.dart' as http;
 import 'package:my_activity/Sales/Home/Page/CreatePost.dart';
-
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,176 +68,159 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildStoryCard(context, 'Sebastian Wicaksono', 'Ini Benar-Benar Mengagumkan', '1 hour ago'),
-                _buildStoryCard(context, 'Agus Jackson', 'Saya Suka dengan Layanan ini', '15 hours ago'),
-                _buildStoryCard(context, 'Dimas Nugraha', 'Saya Suka update baru ini; Semakin Menarik', '5 hours ago'),
-              ],
-            ),
-          ),
+          Expanded(child: CommentsSection()),
         ],
       ),
     );
   }
-
-  Widget _buildStoryCard(BuildContext context, String name, String content, String time) {
-    return StoryCard(
-      name: name,
-      content: content,
-      time: time,
-    );
-  }
 }
 
-class StoryCard extends StatefulWidget {
-  final String name;
-  final String content;
-  final String time;
+class CommentsSection extends StatefulWidget {
+  @override
+  _CommentsSectionState createState() => _CommentsSectionState();
+}
 
-  const StoryCard({
-    Key? key,
-    required this.name,
-    required this.content,
-    required this.time,
-  }) : super(key: key);
+class _CommentsSectionState extends State<CommentsSection> {
+  late Future<List<Map<String, dynamic>>> commentsFuture;
 
   @override
-  _StoryCardState createState() => _StoryCardState();
-}
-
-class _StoryCardState extends State<StoryCard> {
-  int likeCount = 0;
-  List<String> comments = [];
-
-  void _toggleLike() {
-    setState(() {
-      likeCount++;
-    });
+  void initState() {
+    super.initState();
+    commentsFuture = fetchComments();
   }
 
-  void _showCommentSection() {
-    TextEditingController commentController = TextEditingController();
+  Future<List<Map<String, dynamic>>> fetchComments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
 
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Comments',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: ListView(
-                      children: comments
-                          .map((comment) => ListTile(
-                                leading: const CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                      'https://example.com/user_avatar.jpg'),
-                                ),
-                                title: const Text('User'),
-                                subtitle: Text(comment),
-                              ))
-                          .toList(),
-                    ),
-                  ),
-                  TextField(
-                    controller: commentController,
-                    decoration: InputDecoration(
-                      hintText: 'Add a comment...',
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: () {
-                          setModalState(() {
-                            comments.add(commentController.text);
-                          });
-                          commentController.clear();
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
+    if (token == null) {
+      throw Exception('Authentication token not found. Please log in again.');
+    }
+
+    final response = await http.get(
+      Uri.parse('http://localhost:8080/api/comments/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
       },
     );
+
+    if (response.statusCode == 200) {
+      print('API Response: ${response.body}'); // Debugging response
+      final data = jsonDecode(response.body);
+      if (data is Map && data.containsKey('comments')) {
+        return List<Map<String, dynamic>>.from(data['comments']);
+      } else if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      } else {
+        throw Exception('Unexpected JSON format.');
+      }
+    } else {
+      throw Exception('Failed to fetch comments: ${response.reasonPhrase}');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(
-                    'https://example.com/user_avatar.jpg',
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: commentsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          print('Error: ${snapshot.error}');
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No comments available yet.'));
+        }
+
+        final comments = snapshot.data!;
+        return RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              commentsFuture = fetchComments();
+            });
+          },
+          child: ListView.builder(
+            itemCount: comments.length,
+            // Remove shrinkWrap and NeverScrollableScrollPhysics
+            itemBuilder: (context, index) {
+              final comment = comments[index];
+              return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(
+                              'https://example.com/user_avatar.jpg',
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                comment['posted_by'] ?? 'Anonymous',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                comment['date'] ?? 'Unknown date',
+                                style: const TextStyle(color: Colors.grey, fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        comment['description'] ?? 'No description',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.thumb_up, color: Colors.blue),
+                                onPressed: () {
+                                  // Handle like action
+                                },
+                              ),
+                              const Text('0'),
+                            ],
+                          ),
+                          const SizedBox(width: 35),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.blue),
+                                onPressed: () {
+                                  // Handle comment action
+                                },
+                              ),
+                              const Text('0'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(widget.time, style: const TextStyle(color: Colors.grey, fontSize: 10)),
-                    SizedBox(
-                      width: max(155, 200),
-                      child: Text(widget.content),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.thumb_up, color: Colors.blue),
-                              onPressed: _toggleLike,
-                            ),
-                            Text('$likeCount'),
-                          ],
-                        ),
-                        const SizedBox(width: 35),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.blue),
-                              onPressed: _showCommentSection,
-                            ),
-                            Text('${comments.length}'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -252,18 +233,12 @@ class ImageSlider extends StatelessWidget {
   final List<String> networkImages = [
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb6Rzo_PBz9RnBQ9KgAtcZ1rZsrPQq5bS5xw&s',
     'https://d33wubrfki0l68.cloudfront.net/b4759e96fa9ada8ee8caa4c771fcd503f289d791/6de77/static/triangle_background-9df4fa2e10f0e294779511e99083c2bc.jpg',
-    'https://www.shutterstock.com/blog/wp-content/uploads/sites/5/2020/07/shutterstock_582803470.jpg?w=750',
-  ];
-
-  final List<String> localImages = [
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb6Rzo_PBz9RnBQ9KgAtcZ1rZsrPQq5bS5xw&s',
-    'https://d33wubrfki0l68.cloudfront.net/b4759e96fa9ada8ee8caa4c771fcd503f289d791/6de77/static/triangle_background-9df4fa2e10f0e294779511e99083c2bc.jpg',
-    'https://www.shutterstock.com/blog/wp-content/uploads/sites/5/2020/07/shutterstock_582803470.jpg?w=750',
+    'https://images.pexels.com/photos/531880/pexels-photo-531880.jpeg?cs=srgb&dl=pexels-pixabay-531880.jpg&fm=jpg'
   ];
 
   @override
   Widget build(BuildContext context) {
-    final images = isNetwork ? networkImages : localImages;
+    final images = isNetwork ? networkImages : [];
 
     return CarouselSlider(
       items: images.map((imagePath) {
@@ -271,9 +246,7 @@ class ImageSlider extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20.0),
-            child: isNetwork
-                ? Image.network(imagePath, fit: BoxFit.cover)
-                : Image.asset(imagePath, fit: BoxFit.cover),
+            child: Image.network(imagePath, fit: BoxFit.cover),
           ),
         );
       }).toList(),

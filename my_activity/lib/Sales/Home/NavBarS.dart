@@ -17,7 +17,7 @@ class _NavBarState extends State<NavBars> {
   int _pageIndex = 0;
 
   final List<Widget> _pages = [
-    const HomeScreen(),
+    HomeScreen(),
     const Dashboard(),
     const LeadList(),
     const Activity(),

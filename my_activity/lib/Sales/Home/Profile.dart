@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class Profile extends StatelessWidget {
-  const Profile({super.key});
+  final String token;
+
+  const Profile({super.key, required this.token});
 
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    String email = decodedToken['email'] ?? 'Email tidak tersedia';
+    String username = decodedToken['username'] ?? 'Username tidak tersedia';
+    String image = decodedToken['image'] ?? 'assets/images/profile.jpeg';
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
             Stack(
-              clipBehavior: Clip.none, 
+              clipBehavior: Clip.none,
               children: [
                 Container(
                   width: double.infinity,
@@ -35,16 +43,14 @@ class Profile extends StatelessWidget {
                   right: 0,
                   child: Column(
                     children: [
-                      const CircleAvatar(
-                         radius: 55,
-                        backgroundImage: NetworkImage(
-                          'https://i.pinimg.com/564x/99/61/0e/99610ebb0927d119825e8d61e8f5654f.jpg',
-                        ),
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundImage: NetworkImage(image),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Faust Darwin',
-                        style: TextStyle(
+                      Text(
+                        username,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -67,9 +73,9 @@ class Profile extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: const Text(
-                          'darwinfaust56@gmail.com',
-                          style: TextStyle(
+                        child: Text(
+                          email,
+                          style: const TextStyle(
                             color: Colors.black,
                             fontSize: 14,
                           ),
@@ -80,7 +86,7 @@ class Profile extends StatelessWidget {
                 ),
                 Positioned(
                   top: 135,
-                  left: MediaQuery.of(context).size.width / 2 + 15, 
+                  left: MediaQuery.of(context).size.width / 2 + 15,
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.blue,

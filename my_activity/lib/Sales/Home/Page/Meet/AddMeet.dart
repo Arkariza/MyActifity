@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:my_activity/Sales/Home/Activity.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart'; 
 import 'package:my_activity/Sales/Home/Page/Location/maps_location.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,10 +128,10 @@ class _AddMeetState extends State<AddMeet> {
     );
 
     if (response.statusCode == 201) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Activity()),
-      );
+      _showSnackBar('Meet added successfully!');
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pop(context, true); 
+      });
     } else {
       final errorBody = jsonDecode(response.body);
       _showSnackBar(errorBody['error'] ?? 'Failed to add meet');
@@ -141,7 +140,6 @@ class _AddMeetState extends State<AddMeet> {
     _showSnackBar('Error connecting to the server: $e');
   }
 }
-
 
   void _resetForm() {
     _clientNameController.clear();

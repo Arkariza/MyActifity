@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -29,6 +30,32 @@ class _AddCallState extends State<AddCall> {
   final TextEditingController _clientNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  DateTime? _selectedDate;
+  final TextEditingController _dateController = TextEditingController();
+
+  @override
+  void dispose() {
+    _clientNameController.dispose();
+    _phoneNumberController.dispose();
+    _noteController.dispose();
+    _dateController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
 
   Future<void> _addCall() async {
     if (_clientNameController.text.isEmpty) {
@@ -37,6 +64,10 @@ class _AddCallState extends State<AddCall> {
     }
     if (_phoneNumberController.text.isEmpty) {
       _showSnackBar('Please enter phone number');
+      return;
+    }
+    if (_selectedDate == null) {
+      _showSnackBar('Please select date');
       return;
     }
     if (_noteController.text.isEmpty) {
@@ -55,6 +86,7 @@ class _AddCallState extends State<AddCall> {
     final callData = {
       'client_name': _clientNameController.text,
       'phonenum': _phoneNumberController.text,
+      'date': DateFormat('yyyy-MM-dd').format(_selectedDate!),
       'note': _noteController.text
     };
 
@@ -68,20 +100,28 @@ class _AddCallState extends State<AddCall> {
         body: jsonEncode(callData),
       );
 
-      if (response.statusCode == 200) {
-        _showSnackBar('Call added successfully');
+      if (response.statusCode == 201) {
+        _showSnackBar('Call added successfully', isSuccess: true);
       } else {
-        _showSnackBar('Call Successfully: ${response.reasonPhrase}');
+        _showSnackBar('Failed to add call: ${response.reasonPhrase}');
       }
     } catch (e) {
       _showSnackBar('An error occurred: $e');
     }
   }
 
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, {bool isSuccess = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isSuccess ? Colors.green : Colors.red,
+      ),
     );
+    if (isSuccess) {
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pop(context);
+      });
+    }
   }
 
   @override
@@ -154,18 +194,13 @@ class _AddCallState extends State<AddCall> {
                       TextFormField(
                         controller: _clientNameController,
                         decoration: InputDecoration(
-                          prefixIcon: const Opacity(
-                            opacity: 0.5,
-                            child: Icon(Icons.person),
-                          ),
+                          prefixIcon: const Icon(Icons.person),
                           filled: true,
                           fillColor: Colors.white,
                           hintText: 'Client Name',
-                          hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
+                          hintStyle:
+                              TextStyle(color: Colors.black.withOpacity(0.5)),
                           border: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
                           focusedBorder: const UnderlineInputBorder(
@@ -177,18 +212,33 @@ class _AddCallState extends State<AddCall> {
                       TextFormField(
                         controller: _phoneNumberController,
                         decoration: InputDecoration(
-                          prefixIcon: const Opacity(
-                            opacity: 0.5,
-                            child: Icon(Icons.phone),
-                          ),
+                          prefixIcon: const Icon(Icons.phone),
                           filled: true,
                           fillColor: Colors.white,
                           hintText: 'Phone Number',
-                          hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
+                          hintStyle:
+                              TextStyle(color: Colors.black.withOpacity(0.5)),
                           border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
-                          enabledBorder: const UnderlineInputBorder(
+                          focusedBorder: const UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      TextFormField(
+                        controller: _dateController,
+                        readOnly: true,
+                        onTap: () => _selectDate(context),
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.calendar_today),
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: 'Select Date',
+                          hintStyle:
+                              TextStyle(color: Colors.black.withOpacity(0.5)),
+                          border: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
                           focusedBorder: const UnderlineInputBorder(
@@ -200,18 +250,13 @@ class _AddCallState extends State<AddCall> {
                       TextFormField(
                         controller: _noteController,
                         decoration: InputDecoration(
-                          prefixIcon: const Opacity(
-                            opacity: 0.5,
-                            child: Icon(Icons.note),
-                          ),
+                          prefixIcon: const Icon(Icons.note),
                           filled: true,
                           fillColor: Colors.white,
                           hintText: 'Note',
-                          hintStyle: TextStyle(color: Colors.black.withOpacity(0.5)),
+                          hintStyle:
+                              TextStyle(color: Colors.black.withOpacity(0.5)),
                           border: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                           ),
                           focusedBorder: const UnderlineInputBorder(
@@ -224,7 +269,8 @@ class _AddCallState extends State<AddCall> {
                         onPressed: _addCall,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
-                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),

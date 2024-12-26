@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(const MyApp());
 
@@ -13,12 +16,68 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class CallDate extends StatelessWidget {
+class CallDate extends StatefulWidget {
   const CallDate({super.key});
+
+  @override
+  _CallDateState createState() => _CallDateState();
+}
+
+class _CallDateState extends State<CallDate> {
+  List<dynamic> _calls = [];
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  Future<void> _fetchCalls() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      _showSnackBar('Authentication token not found. Please log in again.');
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8080/api/calls/');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _calls = json.decode(response.body);
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _errorMessage = 'Failed to load calls. Please try again later.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCalls();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Call Date')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -58,11 +117,11 @@ class CallDate extends StatelessWidget {
                     fontSize: 20,
                   ),
                 ),
-              ]
+              ],
             ),
-            const SizedBox(height: 55,),
+            const SizedBox(height: 55),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: _fetchCalls,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
@@ -81,48 +140,24 @@ class CallDate extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Expanded(
-              child: ListView(
-                children: const [
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-
-                ],
-              ),
-            ),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage.isNotEmpty
+                    ? Text(_errorMessage)
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: _calls.length,
+                          itemBuilder: (context, index) {
+                            return ActivityTile(
+                              icon: Icons.phone,
+                              iconColor: Colors.red,
+                              title: 'Call',
+                              subtitle: 'By: ${_calls[index]['callerName']}',
+                              time: _calls[index]['time'],
+                            );
+                          },
+                        ),
+                      ),
           ],
         ),
       ),

@@ -677,6 +677,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  syncfusion_flutter_charts:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_charts
+      sha256: "3200bc8acbc91658159464898949f90c984e054eba01e07dfde440ad36f1befd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "28.1.36"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: "853069545b718aa13d466bfc3e7b4cfa2cadcbb3c06f531d0053177dc6f1a092"
+      url: "https://pub.dev"
+    source: hosted
+    version: "28.1.36"
   table_calendar:
     dependency: "direct main"
     description:

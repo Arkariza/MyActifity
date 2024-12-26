@@ -1,12 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class PendingPage extends StatelessWidget {
+class PendingPage extends StatefulWidget {
   const PendingPage({Key? key}) : super(key: key);
+
+  @override
+  _PendingPageState createState() => _PendingPageState();
+}
+
+class _PendingPageState extends State<PendingPage> {
+  List<dynamic> pendings = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPendingLeads();
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> fetchPendingLeads() async {
+    const String apiUrl = 'http://localhost:8080/api/leads/';
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        _showSnackBar('Authentication token not found. Please log in again.');
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['leads'] != null) {
+          setState(() {
+            pendings = responseData['leads']
+                .where((lead) => lead['status'] == 'Pending')
+                .toList();
+          });
+        } else {
+          _showSnackBar('Invalid response format: leads data is missing.');
+        }
+      } else if (response.statusCode == 401) {
+        _showSnackBar('Invalid token. Please log in again.');
+      } else {
+        _showSnackBar('Failed to fetch leads: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showSnackBar('Error fetching leads: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea( 
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -40,7 +104,7 @@ class PendingPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   const Text(
-                    'On-Progress Leads',
+                    'Pending Leads',
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -59,35 +123,20 @@ class PendingPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: ListView(
-                  children: [
-                    _buildPendingCard(
-                      imageUrl: 'https://i.imgur.com/MP6dB0b.jpg', 
-                      policyHolder: 'Ryuki Kajiwara',
-                      bfaName: 'Welt Joyce',
-                    ),
-                    _buildPendingCard(
-                      imageUrl: 'https://i.imgur.com/PL7JslK.jpg',
-                      policyHolder: 'Himeko',
-                      bfaName: 'Welt Joyce',
-                    ),
-                    _buildPendingCard(
-                      imageUrl: 'https://i.imgur.com/hHNdInK.jpg',
-                      policyHolder: 'Peter Pete',
-                      bfaName: 'Welt Joyce',
-                    ),
-                    _buildPendingCard(
-                      imageUrl: 'https://i.imgur.com/7VRmdgJ.jpg', 
-                      policyHolder: 'Erica Richard',
-                      bfaName: 'Welt Joyce',
-                    ),
-                    _buildPendingCard(
-                      imageUrl: 'https://i.imgur.com/kL5TZWv.jpg',
-                      policyHolder: 'Adam Smith',
-                      bfaName: 'Welt Joyce',
-                    ),
-                  ],
-                ),
+                child: pendings.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        itemCount: pendings.length,
+                        itemBuilder: (context, index) {
+                          final pending = pendings[index];
+                          return _buildPendingCard(
+                            imageUrl: pending['image'] ??
+                                'https://via.placeholder.com/150',
+                            policyHolder: pending['clientName'] ?? 'Unknown',
+                            bfaName: pending['bfaName'] ?? 'N/A',
+                          );
+                        },
+                      ),
               ),
             ],
           ),
@@ -155,7 +204,7 @@ class PendingPage extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12, 
+                        fontSize: 12,
                       ),
                     ),
                   ),

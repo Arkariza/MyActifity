@@ -35,8 +35,8 @@ class _NavBarState extends State<NavBar> {
     setState(() {
       token = fetchedToken; 
         _pages = [
-          const HomePageStaff(),
-          const AddRefeal(),
+          HomePageStaff(token: token!),
+          AddRefeal(),
           DetailPage(token: token!),
         ];
     });

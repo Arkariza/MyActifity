@@ -3,12 +3,19 @@ import 'package:my_activity/Staff/Home/Page/OnProgres.dart';
 import 'package:my_activity/Staff/Home/Page/OpenLead.dart';
 import 'package:my_activity/Staff/Home/Page/PendingPage.dart';
 import 'package:my_activity/Staff/Home/Page/WinLosePage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class HomePageStaff extends StatelessWidget {
-  const HomePageStaff({super.key});
+  final String token;
+
+  const HomePageStaff({super.key, required this.token});
   
   @override
   Widget  build(BuildContext context) {
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    String username = decodedToken['username'] ?? 'Username tidak tersedia';
+    String image = decodedToken['image'] ?? 'assets/images/user.png';
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(10),
@@ -18,7 +25,7 @@ class HomePageStaff extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -31,7 +38,7 @@ class HomePageStaff extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Faust Darwin',
+                      username,
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
@@ -41,9 +48,9 @@ class HomePageStaff extends StatelessWidget {
                   ],
                 ),
                 ClipOval(
-                  child: Image.asset(
-                    'assets/images/user.jpeg',
-                    width: 60,
+                  child: Image.network(
+                    image,
+                    width: 20,
                     height: 60,
                     fit: BoxFit.cover,
                   ),

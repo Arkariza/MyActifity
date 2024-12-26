@@ -308,7 +308,7 @@ Widget _buildSalesStageBox(
           ? () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Pendingassigment()),
+                MaterialPageRoute(builder: (context) => const PendingAssignment()),
               );
             }
           : null,

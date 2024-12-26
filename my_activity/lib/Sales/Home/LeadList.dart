@@ -16,9 +16,7 @@ class _LeadListState extends State<LeadList> {
   String searchQuery = '';
   String selectedFilter = 'All';
   final ScrollController _scrollController = ScrollController();
-  List<dynamic> leads = [
-
-  ];
+  List<dynamic> leads = [];
 
   @override
   void initState() {
@@ -38,7 +36,7 @@ class _LeadListState extends State<LeadList> {
   }
 
   Future<void> fetchLeads() async {
-    const String apiUrl = 'http://localhost:8080/api/leads/';
+  const String apiUrl = 'http://localhost:8080/api/leads/';
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -61,7 +59,9 @@ class _LeadListState extends State<LeadList> {
         final responseData = json.decode(response.body);
         if (responseData['leads'] != null) {
           setState(() {
-            leads = responseData['leads'];
+            leads = responseData['leads']
+                .where((lead) => lead['status'] == 'Open')
+                .toList();
           });
         } else {
           showError('Invalid response format: leads data is missing');
@@ -76,18 +76,15 @@ class _LeadListState extends State<LeadList> {
     }
   }
 
+
   Widget leadItem({
-    required String image,
-    required String name,
-    required int progress,
-    required String status,
-    required Color badgeColor,
+    required Map<String, dynamic> lead,
   }) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => LeadDetail(name: name, status: status),
+            builder: (context) => LeadDetail(id: lead['id']),
           ),
         );
       },
@@ -102,7 +99,9 @@ class _LeadListState extends State<LeadList> {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundImage: NetworkImage(image),
+                backgroundImage: NetworkImage(
+                  lead['image'] ?? 'https://via.placeholder.com/150',
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -110,7 +109,7 @@ class _LeadListState extends State<LeadList> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      lead['clientName'] ?? 'Unknown Client',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -118,7 +117,7 @@ class _LeadListState extends State<LeadList> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Progress: $progress%',
+                      'Progress: ${(lead['progress'] ?? 0).toInt()}%',
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.grey,
@@ -126,7 +125,7 @@ class _LeadListState extends State<LeadList> {
                     ),
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
-                      value: progress / 100,
+                      value: (lead['progress'] ?? 0) / 100,
                       color: Colors.blue,
                       backgroundColor: Colors.grey[300],
                     ),
@@ -137,11 +136,13 @@ class _LeadListState extends State<LeadList> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: badgeColor,
+                  color: lead['typeLead'] == 'Self'
+                      ? Colors.blue
+                      : Colors.yellow,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  status,
+                  lead['typeLead'] ?? 'Unknown',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -254,13 +255,7 @@ class _LeadListState extends State<LeadList> {
                     itemCount: leads.length,
                     itemBuilder: (context, index) {
                       final lead = leads[index];
-                      return leadItem(
-                        image: 'https://via.placeholder.com/150',
-                        name: lead['clientName'] ?? 'Unknown Client',
-                        progress: (lead['progress'] as num?)?.toInt() ?? 0,
-                        status: lead['typeLead'] ?? 'Unknown',
-                        badgeColor: lead['typeLead'] == 'Self' ? Colors.blue : Colors.yellow,
-                      );
+                      return leadItem(lead: lead);
                     },
                   ),
                 ),

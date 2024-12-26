@@ -106,7 +106,6 @@ class _CommentsSectionState extends State<CommentsSection> {
     );
 
     if (response.statusCode == 200) {
-      print('API Response: ${response.body}'); // Debugging response
       final data = jsonDecode(response.body);
       if (data is Map && data.containsKey('comments')) {
         return List<Map<String, dynamic>>.from(data['comments']);
@@ -143,7 +142,6 @@ class _CommentsSectionState extends State<CommentsSection> {
           },
           child: ListView.builder(
             itemCount: comments.length,
-            // Remove shrinkWrap and NeverScrollableScrollPhysics
             itemBuilder: (context, index) {
               final comment = comments[index];
               return Card(
@@ -193,7 +191,6 @@ class _CommentsSectionState extends State<CommentsSection> {
                               IconButton(
                                 icon: const Icon(Icons.thumb_up, color: Colors.blue),
                                 onPressed: () {
-                                  // Handle like action
                                 },
                               ),
                               const Text('0'),
@@ -205,7 +202,6 @@ class _CommentsSectionState extends State<CommentsSection> {
                               IconButton(
                                 icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.blue),
                                 onPressed: () {
-                                  // Handle comment action
                                 },
                               ),
                               const Text('0'),

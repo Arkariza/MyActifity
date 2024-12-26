@@ -1,343 +1,312 @@
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:http/http.dart' as http;
 import 'package:my_activity/Sales/Home/Page/ActifityHistory.dart';
+import 'dart:convert';
+import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LeadDetail extends StatelessWidget {
-  final String name;
-  final String status;
+class LeadDetail extends StatefulWidget {
+  final String id;
 
-  const LeadDetail({super.key, required this.name, required this.status});
+  const LeadDetail({super.key, required this.id});
 
   @override
-  Widget build(BuildContext context) {
-    double progress = 0.05;
+  _LeadDetailState createState() => _LeadDetailState();
+}
 
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 25),
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  'Lead Detail',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
+class _LeadDetailState extends State<LeadDetail> {
+  Map<String, dynamic>? leadData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLeadDetail();
+  }
+
+  void _showCallPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Text('Make a Call'),
+          content: Text('Call ${leadData?['clientName'] ?? 'N/A'} at ${leadData?['numPhone'] ?? 'N/A'}?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
-            const SizedBox(height: 20),
-            Column(
-              children: [
-                const CircleAvatar(
-                  radius: 65,
-                  backgroundImage: NetworkImage(
-                    'https://i.pinimg.com/564x/61/fd/15/61fd15e4ad47d703dc4cdcb05d26b298.jpg',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.normal,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  status,
-                  style: const TextStyle(
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w300,
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Information",
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontWeight: FontWeight.normal,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Progress: ${(progress * 100).toInt()}%",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: "Poppins",
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: LinearPercentIndicator(
-                          barRadius: const Radius.circular(10),
-                          lineHeight: 10.0,
-                          percent: progress,
-                          backgroundColor: Colors.grey.shade300,
-                          progressColor: Colors.blueAccent,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Phone Number:",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.normal,
-                          fontSize: 11,
-                        ),
-                      ),
-                      Text(
-                        "+62 YYY-XXX-XXXX",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.normal,
-                          fontSize: 11,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        "Number Policy:",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.normal,
-                          fontSize: 11,
-                        ),
-                      ),
-                      Text(
-                        "5556665556665566",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.normal,
-                          fontSize: 11,
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildButton(
-                        icon: Icons.phone,
-                        label: "Call",
-                        color: Colors.red,
-                        onTap: () {
-                          print("User memilih Call");
-                        },
-                      ),
-                      _buildButton(
-                        icon: Icons.person,
-                        label: "Meet",
-                        color: Colors.blue,
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text(
-                                  'Choose Meet Option',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                content: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: ListTile(
-                                        title: const Text(
-                                          'Meet Now',
-                                          style: TextStyle(fontFamily: 'Poppins'),
-                                        ),
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          print("User memilih Meet Now");
-                                        },
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: ListTile(
-                                        title: const Text(
-                                          'Meet Later',
-                                          style: TextStyle(fontFamily: 'Poppins'),
-                                        ),
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          print("User memilih Meet Later");
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text(
-                                      'Cancel',
-                                      style: TextStyle(fontFamily: 'Poppins'),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Activity Mentory",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.normal),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ActivityHistory()),
-                            );
-                          },
-                          icon: const Icon(Icons.arrow_forward_ios),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+            TextButton(
+              onPressed: () {
+                // Implement call functionality here
+                Navigator.pop(context);
+              },
+              child: const Text('Call'),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 5,
-            offset: const Offset(0, 4),
+  void _showMeetPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
           ),
-        ],
-        border: Border.all(color: Colors.black, width: 1.5),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(25),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 0, right: 15, top: 0, bottom: 0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: color,
-                child: Icon(icon, color: Colors.white, size: 25),
-              ),
-              const SizedBox(width: 15),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Poppins",
+          title: const Text('Schedule Meeting'),
+          content: Text('Schedule a meeting with ${leadData?['clientName'] ?? 'N/A'}?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Implement meeting scheduling functionality here
+                Navigator.pop(context);
+              },
+              child: const Text('Schedule'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> fetchLeadDetail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      throw Exception('Authentication token not found. Please log in again.');
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:8080/api/leads/${widget.id}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          leadData = data['lead'];
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load lead details');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching lead detail: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double progress = 0.0;
+    if (leadData != null && leadData!['status'] != null) {
+      switch (leadData!['status']) {
+        case 'Open':
+          progress = 0.25;
+          break;
+        case 'In Progress':
+          progress = 0.5;
+          break;
+        case 'Pending':
+          progress = 0.75;
+          break;
+        case 'Closed':
+          progress = 1.0;
+          break;
+        default:
+          progress = 0.0;
+      }
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.black,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Lead Detail',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: const NetworkImage(
+                              'https://i.pinimg.com/564x/61/fd/15/61fd15e4ad47d703dc4cdcb05d26b298.jpg',
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            leadData?['clientName'] ?? 'N/A',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Information",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            "Progress: ${(progress * 100).toInt()}%",
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          LinearPercentIndicator(
+                            padding: EdgeInsets.zero,
+                            barRadius: const Radius.circular(10),
+                            lineHeight: 8.0,
+                            percent: progress,
+                            backgroundColor: Colors.grey.shade200,
+                            progressColor: Colors.blue,
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            "Phone Number: ${leadData?['numPhone'] ?? 'N/A'}",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            "Number Policy: ${leadData?['noPolicy'] ?? 'N/A'}",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: _showCallPopup,
+                                  icon: const Icon(Icons.phone, color: Colors.blue),
+                                  label: const Text('Call'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.blue,
+                                    side: const BorderSide(color: Colors.blue),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: _showMeetPopup,
+                                  icon: const Icon(Icons.videocam, color: Colors.blue),
+                                  label: const Text('Meet'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.blue,
+                                    side: const BorderSide(color: Colors.blue),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ActivityHistory(),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: const [
+                                  Text(
+                                    'Activity History',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Icon(Icons.arrow_forward_ios, size: 16),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

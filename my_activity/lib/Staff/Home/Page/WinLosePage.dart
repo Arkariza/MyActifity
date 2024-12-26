@@ -1,7 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class WinLosePage extends StatelessWidget {
+class WinLosePage extends StatefulWidget {
   const WinLosePage({Key? key}) : super(key: key);
+
+  @override
+  _WinLosePageState createState() => _WinLosePageState();
+}
+
+class _WinLosePageState extends State<WinLosePage> {
+  List<dynamic> results = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWinLoseData();
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> fetchWinLoseData() async {
+    const String apiUrl = 'http://localhost:8080/api/leads/';
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        _showSnackBar('Authentication token not found. Please log in again.');
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['leads'] != null) {
+          setState(() {
+            results = responseData['leads']
+                .where((lead) => lead['status'] == 'Win' || lead['status'] == 'Lose')
+                .toList();
+          });
+        } else {
+          _showSnackBar('Invalid response format: leads data is missing.');
+        }
+      } else if (response.statusCode == 401) {
+        _showSnackBar('Invalid token. Please log in again.');
+      } else {
+        _showSnackBar('Failed to fetch leads: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showSnackBar('Error fetching leads: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +102,7 @@ class WinLosePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10), 
+                  const SizedBox(width: 10),
                   const Text(
                     'Win/Lose',
                     style: TextStyle(
@@ -59,40 +123,21 @@ class WinLosePage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: ListView(
-                  children: [
-                    _buildResultCard(
-                      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9Njse2IRGeO4hx325KhANlY5NTCExg6wYsQ&s',
-                      policyHolder: 'Ryuki Kajiwara',
-                      bfaName: 'Welt Joyce',
-                      status: 'Win',
-                    ),
-                    _buildResultCard(
-                      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9Njse2IRGeO4hx325KhANlY5NTCExg6wYsQ&s', 
-                      policyHolder: 'Himeko',
-                      bfaName: 'Welt Joyce',
-                      status: 'Lose', 
-                    ),
-                    _buildResultCard(
-                      imageUrl: 'https://i.imgur.com/hHNdInK.jpg', 
-                      policyHolder: 'Peter Pete',
-                      bfaName: 'Welt Joyce',
-                      status: 'Win', 
-                    ),
-                    _buildResultCard(
-                      imageUrl: 'https://i.imgur.com/7VRmdgJ.jpg', 
-                      policyHolder: 'Erica Richard',
-                      bfaName: 'Welt Joyce',
-                      status: 'Lose', 
-                    ),
-                    _buildResultCard(
-                      imageUrl: 'https://i.imgur.com/kL5TZWv.jpg', 
-                      policyHolder: 'Adam Smith',
-                      bfaName: 'Welt Joyce',
-                      status: 'Lose', 
-                    ),
-                  ],
-                ),
+                child: results.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        itemCount: results.length,
+                        itemBuilder: (context, index) {
+                          final result = results[index];
+                          return _buildResultCard(
+                            imageUrl: result['image'] ??
+                                'https://via.placeholder.com/150',
+                            policyHolder: result['clientName'] ?? 'Unknown',
+                            bfaName: result['bfaName'] ?? 'N/A',
+                            status: result['status'] ?? 'Unknown',
+                          );
+                        },
+                      ),
               ),
             ],
           ),
@@ -105,7 +150,7 @@ class WinLosePage extends StatelessWidget {
     required String imageUrl,
     required String policyHolder,
     required String bfaName,
-    required String status, 
+    required String status,
   }) {
     Color statusColor = status == 'Win' ? Colors.green : Colors.red;
 
@@ -149,23 +194,23 @@ class WinLosePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    width: double.infinity, 
-                    height: 30,  
+                    width: double.infinity,
+                    height: 30,
                     padding: const EdgeInsets.symmetric(
-                      vertical: 6, 
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor, 
+                      color: statusColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      status, 
+                      status,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14, 
+                        fontSize: 14,
                       ),
                     ),
                   ),

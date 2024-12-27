@@ -60,8 +60,9 @@ class _LeadListState extends State<LeadList> {
         if (responseData['leads'] != null) {
           setState(() {
             leads = responseData['leads']
-                .where((lead) => lead['status'] == 'Open')
-                .toList();
+            .where((lead) => ['Open', 'Win', 'OnProgress'].contains(lead['status']))
+            .toList();
+
           });
         } else {
           showError('Invalid response format: leads data is missing');

@@ -24,13 +24,14 @@ class CallDate extends StatefulWidget {
 }
 
 class _CallDateState extends State<CallDate> {
-  List<dynamic> _calls = [];
+  List<Map<String, dynamic>> _calls = [];
   bool _isLoading = false;
   String _errorMessage = '';
 
   Future<void> _fetchCalls() async {
     setState(() {
       _isLoading = true;
+      _errorMessage = '';
     });
 
     final prefs = await SharedPreferences.getInstance();
@@ -38,25 +39,43 @@ class _CallDateState extends State<CallDate> {
 
     if (token == null) {
       _showSnackBar('Authentication token not found. Please log in again.');
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
     final url = Uri.parse('http://localhost:8080/api/calls/');
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-    if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+
+        setState(() {
+          _calls = (responseBody['data'] as List<dynamic>).map((call) {
+            return {
+              'client_name': call['client_name'],
+              'date': call['date'],
+              'phonenum': call['phonenum'] ?? call['phone_num'], // Handle both keys
+            };
+          }).toList();
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Failed to load calls. Please try again later.';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        _calls = json.decode(response.body);
-        _isLoading = false;
-      });
-    } else {
-      setState(() {
-        _errorMessage = 'Failed to load calls. Please try again later.';
+        _errorMessage = 'An error occurred. Please check your connection.';
         _isLoading = false;
       });
     }
@@ -85,29 +104,6 @@ class _CallDateState extends State<CallDate> {
           children: [
             Row(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
                 const SizedBox(width: 10),
                 const Text(
                   'Call Date',
@@ -148,12 +144,13 @@ class _CallDateState extends State<CallDate> {
                         child: ListView.builder(
                           itemCount: _calls.length,
                           itemBuilder: (context, index) {
+                            final call = _calls[index];
                             return ActivityTile(
                               icon: Icons.phone,
-                              iconColor: Colors.red,
-                              title: 'Call',
-                              subtitle: 'By: ${_calls[index]['callerName']}',
-                              time: _calls[index]['time'],
+                              iconColor: Colors.green,
+                              title: call['client_name'],
+                              subtitle: 'Phone: ${call['phonenum']}',
+                              time: call['date'],
                             );
                           },
                         ),
@@ -172,7 +169,8 @@ class ActivityTile extends StatelessWidget {
   final String subtitle;
   final String? time;
 
-  const ActivityTile({super.key, 
+  const ActivityTile({
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.title,

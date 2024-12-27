@@ -141,18 +141,6 @@ class _AddMeetState extends State<AddMeet> {
   }
 }
 
-  void _resetForm() {
-    _clientNameController.clear();
-    _phoneNumberController.clear();
-    _dateController.clear();
-    _addressController.clear();
-    _noteController.clear();
-    setState(() {
-      _addressText = 'Address';
-      _selectedLocation = null;
-    });
-  }
-
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),

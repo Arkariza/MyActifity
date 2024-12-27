@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_activity/Sales/Home/Page/ActifityHistory.dart';
+import 'package:my_activity/Sales/Home/Page/Call/AddCall.dart';
+import 'package:my_activity/Sales/Home/Page/Meet/AddMeet.dart';
+import 'package:my_activity/Sales/Home/Page/Meet/MeetNow.dart';
 import 'dart:convert';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,15 +39,20 @@ class _LeadDetailState extends State<LeadDetail> {
           content: Text('Call ${leadData?['clientName'] ?? 'N/A'} at ${leadData?['numPhone'] ?? 'N/A'}?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddCall()),
+                );
+              },
+              child: const Text('Call Later'),
             ),
             TextButton(
               onPressed: () {
                 // Implement call functionality here
                 Navigator.pop(context);
               },
-              child: const Text('Call'),
+              child: const Text('CallNow'),
             ),
           ],
         );
@@ -64,15 +72,22 @@ class _LeadDetailState extends State<LeadDetail> {
           content: Text('Schedule a meeting with ${leadData?['clientName'] ?? 'N/A'}?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddMeet()),
+                );
+              },
+              child: const Text('Meet Later'),
             ),
             TextButton(
               onPressed: () {
-                // Implement meeting scheduling functionality here
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Meetnow()),
+                );
               },
-              child: const Text('Schedule'),
+              child: const Text('Meet Now'),
             ),
           ],
         );

@@ -1,17 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: CallDate(),
     );
   }
 }
 
-class CallDate extends StatelessWidget {
+class CallDate extends StatefulWidget {
+  const CallDate({super.key});
+
+  @override
+  _CallDateState createState() => _CallDateState();
+}
+
+class _CallDateState extends State<CallDate> {
+  List<Map<String, dynamic>> _calls = [];
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  Future<void> _fetchCalls() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      _showSnackBar('Authentication token not found. Please log in again.');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8080/api/calls/');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+
+        setState(() {
+          _calls = (responseBody['data'] as List<dynamic>).map((call) {
+            return {
+              'client_name': call['client_name'],
+              'date': call['date'],
+              'phonenum': call['phonenum'] ?? call['phone_num'], // Handle both keys
+            };
+          }).toList();
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Failed to load calls. Please try again later.';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An error occurred. Please check your connection.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCalls();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,8 +126,8 @@ class CallDate extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Call Date',
                   style: TextStyle(
                     color: Colors.black,
@@ -54,19 +135,19 @@ class CallDate extends StatelessWidget {
                     fontSize: 20,
                   ),
                 ),
-              ]
+              ],
             ),
-            SizedBox(height: 55,),
+            const SizedBox(height: 55),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: _fetchCalls,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               ),
-              child: Text(
+              child: const Text(
                 'Today',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -77,48 +158,25 @@ class CallDate extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Expanded(
-              child: ListView(
-                children: [
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-                  ActivityTile(
-                    icon: Icons.phone,
-                    iconColor: Colors.red,
-                    title: 'Call',
-                    subtitle: 'By: Welt Joyce',
-                    time: "55.55",
-                  ),
-
-                ],
-              ),
-            ),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage.isNotEmpty
+                    ? Text(_errorMessage)
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: _calls.length,
+                          itemBuilder: (context, index) {
+                            final call = _calls[index];
+                            return ActivityTile(
+                              icon: Icons.phone,
+                              iconColor: Colors.green,
+                              title: call['client_name'],
+                              subtitle: 'Phone: ${call['phonenum']}',
+                              time: call['date'],
+                            );
+                          },
+                        ),
+                      ),
           ],
         ),
       ),
@@ -134,6 +192,7 @@ class ActivityTile extends StatelessWidget {
   final String? time;
 
   const ActivityTile({
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.title,
@@ -144,7 +203,7 @@ class ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
+      margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.white,
@@ -153,7 +212,7 @@ class ActivityTile extends StatelessWidget {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -164,24 +223,24 @@ class ActivityTile extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.bold,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(fontFamily: 'Poppins'),
+          style: const TextStyle(fontFamily: 'Poppins'),
         ),
         trailing: time != null
             ? Text(
                 time!,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.bold,
                 ),
               )
-            : Icon(Icons.arrow_forward_ios),
+            : const Icon(Icons.arrow_forward_ios),
       ),
     );
   }

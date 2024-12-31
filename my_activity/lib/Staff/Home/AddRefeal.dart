@@ -1,247 +1,301 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AddRefeal extends StatelessWidget {
+class AddRefeal extends StatefulWidget {
   const AddRefeal({super.key});
+
+  @override
+  _AddRefealState createState() => _AddRefealState();
+}
+
+class _AddRefealState extends State<AddRefeal> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
+
+  String? selectedPriority;
+  String? selectedAssignTo;
+  List<Map<String, dynamic>> assignToOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAssignToOptions();
+  }
+
+  Future<void> fetchAssignToOptions() async {
+  const String apiUrl = "http://localhost:8080/api/users/";
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+
+  if (token == null) {
+    return;
+  }
+
+  try {
+    final response = await http.get(
+      Uri.parse(apiUrl),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final dynamic data = json.decode(response.body);
+      if (data is List<dynamic>) {
+        setState(() {
+          assignToOptions = data
+              .where((user) => user['role'] == "1")
+              .map((user) {
+                return {
+                  "id": user['_id'], 
+                  "name": user['username'],
+                };
+              })
+              .toList();
+        });
+      } else {
+        print('Unexpected data format: Not a list');
+      }
+    } else {
+      print('Failed to fetch users: ${response.body}');
+    }
+  } catch (e) {
+    print('Error fetching users: $e');
+  }
+}
+
+  Future<void> submitRefeal({
+    required String name,
+    required String phone,
+    required String priority,
+    required String assignTo,
+    required String note,
+  }) async {
+    const String apiUrl = "http://localhost:8080/api/leads/add";
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'clientname': name,
+          'numphone': phone,
+          'priority': priority,
+          'assign_to': assignTo,
+          'information': note,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Refeal submitted successfully!');
+      } else {
+        print('Failed to submit refeal: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  InputDecoration getInputDecoration(String hintText) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.blue),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      isDense: true,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(25),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Add Refeal',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 20,),
-            const Text("Add New Refeal",
-              style: TextStyle(
-                fontFamily: "Poppins",
-                fontSize: 15,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Name Policy Holders',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold,
-                fontSize: 12, 
-              ),
-            ),
-            const SizedBox(height: 5),
-            TextField(
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                hintText: 'John Doe',
-                hintStyle: const TextStyle(
-                  fontSize: 12, 
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Phone Number',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(height: 5),
-            TextField(
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                hintText: '081234567890',
-                hintStyle: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Select Priority',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold,
-                fontSize: 12, 
-              ),
-            ),
-            const SizedBox(height: 5),
-            PriorityDropdown(),
-            const SizedBox(height: 10),
-            const Text(
-              'Assign To (BFA)',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold,
-                fontSize: 12, 
-              ),
-            ),
-            const SizedBox(height: 5),
-            AssignToDropdown(),
-            const SizedBox(height: 10),
-            const Text(
-              'Note',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold,
-                fontSize: 12, 
-              ),
-            ),
-            const SizedBox(height: 5),
-            TextField(
-              maxLines: 3,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                hintText: 'Lorem Ipsum',
-                hintStyle: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 60),
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Add Refeal',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
-                child: const Text(
-                  'Save',
+                const Text(
+                  'Add New Refeal',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 25),
+                const Text(
+                  'Name Policy Holders',
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 16,
-                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: nameController,
+                  style: const TextStyle(fontSize: 13),
+                  decoration: getInputDecoration('Input Client Name'),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Phone Number',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: phoneController,
+                  style: const TextStyle(fontSize: 13),
+                  keyboardType: TextInputType.phone,
+                  decoration: getInputDecoration('+62xxxxxxxxxxx'),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Select Priority',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  decoration: getInputDecoration('Select Priority'),
+                  value: selectedPriority,
+                  style: const TextStyle(fontSize: 13, color: Colors.black),
+                  items: ['High', 'Medium', 'Low'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value, style: const TextStyle(fontSize: 13)),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedPriority = newValue;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Assign To (BFA)',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  decoration: getInputDecoration('Select User'),
+                  value: selectedAssignTo,
+                  style: const TextStyle(fontSize: 13, color: Colors.black),
+                  items: assignToOptions.map((user) {
+                    return DropdownMenuItem<String>(
+                      value: user['id'],
+                      child: Text(user['name'], style: const TextStyle(fontSize: 13)),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedAssignTo = newValue;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Note',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: noteController,
+                  style: const TextStyle(fontSize: 13),
+                  maxLines: 3,
+                  decoration: getInputDecoration('....'),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 45,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (nameController.text.isNotEmpty &&
+                          phoneController.text.isNotEmpty &&
+                          selectedPriority != null &&
+                          selectedAssignTo != null &&
+                          noteController.text.isNotEmpty) {
+                        submitRefeal(
+                          name: nameController.text,
+                          phone: phoneController.text,
+                          priority: selectedPriority!,
+                          assignTo: selectedAssignTo!,
+                          note: noteController.text,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Save',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PriorityDropdown extends StatefulWidget {
-  const PriorityDropdown({super.key});
-
-  @override
-  _PriorityDropdownState createState() => _PriorityDropdownState();
-}
-
-class _PriorityDropdownState extends State<PriorityDropdown> {
-  String? selectedPriority;
-  final List<String> priorities = ['High', 'Medium', 'Low'];
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        hintText: 'Select Priority',
-        hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 12),
-      ),
-      value: selectedPriority,
-      icon: const Icon(Icons.arrow_drop_down),
-      items: priorities.map((String priority) {
-        return DropdownMenuItem<String>(
-          value: priority,
-          child: Text(
-            priority,
-            style: const TextStyle(fontSize: 10), // Smaller font size
           ),
-        );
-      }).toList(),
-      onChanged: (String? newValue) {
-        setState(() {
-          selectedPriority = newValue;
-        });
-      },
-    );
-  }
-}
-
-class AssignToDropdown extends StatefulWidget {
-  const AssignToDropdown({super.key});
-
-  @override
-  _AssignToDropdownState createState() => _AssignToDropdownState();
-}
-
-class _AssignToDropdownState extends State<AssignToDropdown> {
-  String? selectedAssign;
-  final List<String> assignOptions = ['Assign Now', 'Assign Later'];
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
         ),
-        hintText: 'Assign Later',
-        hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 12),
       ),
-      value: selectedAssign,
-      icon: const Icon(Icons.arrow_drop_down),
-      items: assignOptions.map((String option) {
-        return DropdownMenuItem<String>(
-          value: option,
-          child: Text(
-            option,
-            style: const TextStyle(fontSize: 10), // Smaller font size
-          ),
-        );
-      }).toList(),
-      onChanged: (String? newValue) {
-        setState(() {
-          selectedAssign = newValue;
-        });
-      },
     );
   }
 }

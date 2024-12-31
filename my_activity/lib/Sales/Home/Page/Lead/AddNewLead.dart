@@ -1,7 +1,76 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AddNewLead extends StatelessWidget {
-  const AddNewLead({super.key});
+class AddNewlead extends StatefulWidget {
+  const AddNewlead({super.key});
+
+  @override
+  _AddNewleadState createState() => _AddNewleadState();
+}
+
+class _AddNewleadState extends State<AddNewlead> {
+  final TextEditingController _clientNameController = TextEditingController();
+  final TextEditingController _numPhoneController = TextEditingController();
+  final TextEditingController _priorityController = TextEditingController();
+  final TextEditingController _informationController = TextEditingController();
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> _addNewLead() async {
+    if (_clientNameController.text.isEmpty) {
+      _showSnackBar('Please enter client name');
+      return;
+    }
+    if (_numPhoneController.text.isEmpty) {
+      _showSnackBar('Please enter phone number');
+      return;
+    }
+    if (_priorityController.text.isEmpty) {
+      _showSnackBar('Please select priority');
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      _showSnackBar('Authentication token not found. Please log in again.');
+      return;
+    }
+
+    final leadData = {
+      "clientname": _clientNameController.text,
+      "numphone": _numPhoneController.text,
+      "priority": _priorityController.text,
+      "information": _informationController.text,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:8080/api/leads/add'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(leadData),
+      );
+
+      if (response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
+        _showSnackBar(responseData['message'] ?? 'Lead added successfully');
+      } else {
+        _showSnackBar('${response.reasonPhrase}');
+      }
+    } catch (e) {
+      _showSnackBar('An error occurred: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +82,7 @@ class AddNewLead extends StatelessWidget {
           children: [
             const SizedBox(height: 25),
             Row(
-             children: [
+              children: [
                 GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
@@ -37,8 +106,8 @@ class AddNewLead extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Add New Lead',
                   style: TextStyle(
                     color: Colors.black,
@@ -46,7 +115,7 @@ class AddNewLead extends StatelessWidget {
                     fontSize: 20,
                   ),
                 ),
-              ]
+              ],
             ),
             const SizedBox(height: 65),
             Container(
@@ -68,8 +137,9 @@ class AddNewLead extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 25),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _clientNameController,
+                    decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.person),
                       hintText: 'Client Name',
                       enabledBorder: UnderlineInputBorder(
@@ -81,8 +151,9 @@ class AddNewLead extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _numPhoneController,
+                    decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.phone),
                       hintText: 'Phone Number',
                       enabledBorder: UnderlineInputBorder(
@@ -94,10 +165,15 @@ class AddNewLead extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  PriorityDropdown(),
+                  PriorityDropdown(
+                    onChanged: (value) {
+                      _priorityController.text = value ?? '';
+                    },
+                  ),
                   const SizedBox(height: 10),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _informationController,
+                    decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.info_outlined),
                       hintText: 'Information',
                       enabledBorder: UnderlineInputBorder(
@@ -110,12 +186,11 @@ class AddNewLead extends StatelessWidget {
                   ),
                   const SizedBox(height: 25),
                   ElevatedButton(
-                    onPressed: () {
-                      
-                    },
+                    onPressed: _addNewLead,
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.blue, 
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      backgroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -140,6 +215,9 @@ class AddNewLead extends StatelessWidget {
 }
 
 class PriorityDropdown extends StatefulWidget {
+  final Function(String?) onChanged;
+  const PriorityDropdown({required this.onChanged, super.key});
+
   @override
   _PriorityDropdownState createState() => _PriorityDropdownState();
 }
@@ -170,6 +248,7 @@ class _PriorityDropdownState extends State<PriorityDropdown> {
         setState(() {
           selectedPriority = newValue;
         });
+        widget.onChanged(newValue);
       },
     );
   }

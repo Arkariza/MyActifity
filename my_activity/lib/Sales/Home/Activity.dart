@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert'; 
 
 class Activity extends StatefulWidget {
+  const Activity({super.key});
+
   @override
   _ActivityState createState() => _ActivityState();
 }
@@ -10,10 +14,41 @@ class _ActivityState extends State<Activity> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
 
+  final Map<DateTime, Map<String, List<Map<String, String>>>> _activities = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadActivities();
+  }
+
+  Future<void> _loadActivities() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> savedActivities = prefs.getStringList('activities') ?? [];
+    
+    Map<DateTime, Map<String, List<Map<String, String>>>> loadedActivities = {};
+    for (var activityJson in savedActivities) {
+      Map<String, dynamic> activity = jsonDecode(activityJson);
+      DateTime activityDate = DateTime.parse(activity['date']);
+      String type = activity['type'];
+      String name = activity['name'];
+      String time = activity['time'];
+
+      loadedActivities.putIfAbsent(activityDate, () => {});
+      loadedActivities[activityDate]?.putIfAbsent(type, () => []);
+      loadedActivities[activityDate]?[type]?.add({'name': name, 'time': time});
+    }
+
+    setState(() {
+      _activities.clear();
+      _activities.addAll(loadedActivities);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView( 
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -47,7 +82,7 @@ class _ActivityState extends State<Activity> {
                       _focusedDay = focusedDay;
                     });
                   },
-                  calendarStyle: CalendarStyle(
+                  calendarStyle: const CalendarStyle(
                     todayDecoration: BoxDecoration(
                       color: Colors.orange,
                       shape: BoxShape.circle,
@@ -56,13 +91,6 @@ class _ActivityState extends State<Activity> {
                       color: Colors.red,
                       shape: BoxShape.circle,
                     ),
-                    defaultTextStyle: const TextStyle(fontSize: 12),
-                    weekendTextStyle: const TextStyle(fontSize: 12),
-                    outsideTextStyle: const TextStyle(fontSize: 10, color: Colors.grey),
-                  ),
-                  daysOfWeekStyle: DaysOfWeekStyle(
-                    weekdayStyle: const TextStyle(fontSize: 12),
-                    weekendStyle: const TextStyle(fontSize: 12),
                   ),
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
@@ -85,25 +113,7 @@ class _ActivityState extends State<Activity> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Call:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              ListTile(
-                leading: const Icon(Icons.phone, color: Colors.blue),
-                title: const Text('Teguh'),
-                subtitle: const Text('15:30'),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Meet:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              ListTile(
-                leading: const Icon(Icons.location_on, color: Colors.blue),
-                title: const Text('Agus'),
-                subtitle: const Text('15:30'),
-              ),
+              ..._buildActivityList(_selectedDay),
             ],
           ),
         ),
@@ -181,33 +191,37 @@ class _ActivityState extends State<Activity> {
   }
 
   String _getMonthName(int month) {
-    switch (month) {
-      case 1:
-        return 'January';
-      case 2:
-        return 'February';
-      case 3:
-        return 'March';
-      case 4:
-        return 'April';
-      case 5:
-        return 'May';
-      case 6:
-        return 'June';
-      case 7:
-        return 'July';
-      case 8:
-        return 'August';
-      case 9:
-        return 'September';
-      case 10:
-        return 'October';
-      case 11:
-        return 'November';
-      case 12:
-        return 'December';
-      default:
-        return '';
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return monthNames[month - 1];
+  }
+
+  List<Widget> _buildActivityList(DateTime date) {
+    final activityForDay = _activities[DateTime(date.year, date.month, date.day)];
+    if (activityForDay == null) {
+      return [
+        const Text('No activities', style: TextStyle(fontSize: 16)),
+      ];
     }
+
+    List<Widget> widgets = [];
+    activityForDay.forEach((type, details) {
+      widgets.add(
+        Text('$type:', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      );
+      widgets.addAll(details.map((detail) => ListTile(
+            leading: Icon(
+              type == 'Call' ? Icons.phone : Icons.location_on,
+              color: Colors.blue,
+            ),
+            title: Text(detail['name']!),
+            subtitle: Text(detail['time']!),
+          )));
+      widgets.add(const SizedBox(height: 10));
+    });
+
+    return widgets;
   }
 }

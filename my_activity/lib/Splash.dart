@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:my_activity/NavBar.dart';
-import 'package:my_activity/Sales/Home/NavBarS.dart';
+import 'package:my_activity/Auth/Login.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -11,14 +12,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToNav();
+    _navigateToLogin();
   }
 
-  _navigateToNav() async {
-    await Future.delayed(Duration(seconds: 3), () {});
+  _navigateToLogin() async {
+    await Future.delayed(const Duration(seconds: 3), () {});
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => NavBar()),
+      MaterialPageRoute(builder: (context) => const LoginPage()),
     );
   }
 
@@ -30,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/images/Logo.png'),
-            SizedBox(height: 20, width: 20,),
+            const SizedBox(height: 20, width: 20,),
           ],
         ),
       ),

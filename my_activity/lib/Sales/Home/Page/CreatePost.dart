@@ -1,7 +1,79 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class CreatePost extends StatelessWidget {
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  CreatePost({super.key});
+
+  Future<void> _createComment(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Authentication token not found. Please log in again.')),
+      );
+      return;
+    }
+
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    final username = decodedToken['username'];
+
+    if (username == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username not found in token.')),
+      );
+      return;
+    }
+
+    final titleText = _titleController.text;
+    final descriptionText = _descriptionController.text;
+
+    if (titleText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Title cannot be empty')),
+      );
+      return;
+    }
+
+    if (descriptionText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Description cannot be empty')),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8080/api/comments/add');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        "title": titleText,
+        "description": descriptionText,
+        "posted_by": username,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comment created successfully!')),
+      );
+      Navigator.pop(context);
+    } else {
+      final error = jsonDecode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${error['error']}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,43 +86,43 @@ class CreatePost extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.black,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Create Post',
+                    style: TextStyle(
                       color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
-                ),
-                SizedBox(width: 10),
-                Text(
-                  'Create Post',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            ),
+                ],
+              ),
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -65,7 +137,7 @@ class CreatePost extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         CircleAvatar(
                           backgroundImage: AssetImage('assets/user_avatar.png'),
@@ -74,7 +146,7 @@ class CreatePost extends StatelessWidget {
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Description',
+                            'Create New Post',
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 16,
@@ -84,13 +156,26 @@ class CreatePost extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter title...',
+                        contentPadding: EdgeInsets.all(12),
+                      ),
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _descriptionController,
                       maxLines: 4,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Type your description here...',
-                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.all(12),
                       ),
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -105,10 +190,7 @@ class CreatePost extends StatelessWidget {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () { 
-                      String descriptionText = _descriptionController.text;
-                      print('Description: $descriptionText');
-                    },
+                    onPressed: () => _createComment(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       elevation: 2,
@@ -116,7 +198,7 @@ class CreatePost extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Post Now',
                       style: TextStyle(
                         fontFamily: 'Poppins',

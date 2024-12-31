@@ -1,12 +1,85 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
-class OpenLead extends StatelessWidget {
+class OpenLead extends StatefulWidget {
   const OpenLead({Key? key}) : super(key: key);
+
+  @override
+  State<OpenLead> createState() => _OpenLeadState();
+}
+
+class _OpenLeadState extends State<OpenLead> {
+  List<dynamic> openLeads = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchOpenLeads();
+  }
+
+  Future<void> fetchOpenLeads() async {
+    const String apiUrl = 'http://localhost:8080/api/leads/';
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        _showSnackBar('Authentication token not found. Please log in again.');
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['leads'] != null) {
+          setState(() {
+            openLeads = responseData['leads']
+                .where((lead) => lead['status'] == 'Open')
+                .toList();
+            isLoading = false;
+          });
+        } else {
+          _showSnackBar('Invalid response format: leads data is missing');
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        _showSnackBar('Failed to fetch leads: ${response.statusCode}');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      _showSnackBar('Error fetching leads: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea( 
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -38,7 +111,7 @@ class OpenLead extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10), 
+                  const SizedBox(width: 10),
                   const Text(
                     'Open Lead',
                     style: TextStyle(
@@ -59,30 +132,20 @@ class OpenLead extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: ListView(
-                  children: [
-                    _buildOpenLeadCard(
-                      policyHolder: 'Nathalia Vadgof',
-                      policyNumber: '00001023',
-                    ),
-                    _buildOpenLeadCard(
-                      policyHolder: 'Leo Sandiego',
-                      policyNumber: '00001024',
-                    ),
-                    _buildOpenLeadCard(
-                      policyHolder: 'Layla Vaganza',
-                      policyNumber: '00001025',
-                    ),
-                    _buildOpenLeadCard(
-                      policyHolder: 'Rosaria Zambrud',
-                      policyNumber: '00001026',
-                    ),
-                    _buildOpenLeadCard(
-                      policyHolder: 'Anatoli Erigo',
-                      policyNumber: '00001027',
-                    ),
-                  ],
-                ),
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : openLeads.isEmpty
+                        ? const Center(child: Text('No Open Leads Found'))
+                        : ListView.builder(
+                            itemCount: openLeads.length,
+                            itemBuilder: (context, index) {
+                              final lead = openLeads[index];
+                              return _buildOpenLeadCard(
+                                policyHolder: lead['clientName'] ?? 'Unknown',
+                                policyNumber: lead['noPolicy'].toString(),
+                              );
+                            },
+                          ),
               ),
             ],
           ),
@@ -90,7 +153,7 @@ class OpenLead extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildOpenLeadCard({
     required String policyHolder,
     required String policyNumber,
@@ -107,7 +170,7 @@ class OpenLead extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Policy Holders: $policyHolder',
+              'Policy Holder: $policyHolder',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
@@ -115,7 +178,7 @@ class OpenLead extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Text(
-              'No. Policy: $policyNumber',
+              'Policy Number: $policyNumber',
               style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 12,

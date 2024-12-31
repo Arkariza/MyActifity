@@ -1,20 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class OnProgres extends StatelessWidget {
-  final List<Map<String, dynamic>> leads = [
-    {"name": "Aprilia Scout", "progress": 0.05, "image": "assets/user1.png"},
-    {"name": "Budi Serazawa", "progress": 0.15, "image": "assets/user2.png"},
-    {"name": "Asep Sitorus", "progress": 0.20, "image": "assets/user3.png"},
-    {"name": "Qila Wulandari", "progress": 0.40, "image": "assets/user4.png"},
-    {
-      "name": "Rangga Agustin",
-      "progress": 1.0,
-      "image": "assets/user5.png",
-      "verified": true
-    },
-    {"name": "Aisyah September", "progress": 0.70, "image": "assets/user6.png"},
-  ];
+class OnProgres extends StatefulWidget {
+  const OnProgres({super.key});
+
+  @override
+  _OnProgresState createState() => _OnProgresState();
+}
+
+class _OnProgresState extends State<OnProgres> {
+  List<dynamic> leads = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLeads();
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void showError(String message) {
+    _showSnackBar(message);
+  }
+
+  Future<void> fetchLeads() async {
+    const String apiUrl = 'http://localhost:8080/api/leads/';
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        _showSnackBar('Authentication token not found. Please log in again.');
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['leads'] != null) {
+          setState(() {
+            leads = responseData['leads']
+                .where((lead) => lead['status'] == 'OnProgress')
+                .toList();
+          });
+        } else {
+          showError('Invalid response format: leads data is missing');
+        }
+      } else if (response.statusCode == 401) {
+        showError('Invalid token. Please log in again.');
+      } else {
+        showError('Failed to fetch leads: ${response.statusCode}');
+      }
+    } catch (e) {
+      showError('Error fetching leads: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +94,7 @@ class OnProgres extends StatelessWidget {
                         BoxShadow(
                           color: Colors.black.withOpacity(0.3),
                           blurRadius: 4,
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -60,20 +116,22 @@ class OnProgres extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20), 
+          const SizedBox(height: 20),
           Expanded(
-            child: ListView.builder(
-              itemCount: leads.length,
-              itemBuilder: (context, index) {
-                final lead = leads[index];
-                return LeadCard(
-                  name: lead['name'],
-                  progress: lead['progress'],
-                  imagePath: lead['image'],
-                  verified: lead['verified'] ?? false,
-                );
-              },
-            ),
+            child: leads.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: leads.length,
+                    itemBuilder: (context, index) {
+                      final lead = leads[index];
+                      return LeadCard(
+                        name: lead['clientName'] ?? 'Unknown',
+                        progress: (lead['progress'] ?? 0) / 100,
+                        imagePath: lead['image'] ?? 'https://via.placeholder.com/150',
+                        verified: lead['verified'] ?? false,
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -88,6 +146,7 @@ class LeadCard extends StatelessWidget {
   final bool verified;
 
   const LeadCard({
+    super.key,
     required this.name,
     required this.progress,
     required this.imagePath,
@@ -106,7 +165,7 @@ class LeadCard extends StatelessWidget {
             BoxShadow(
               color: Colors.black.withOpacity(0.3),
               blurRadius: 4,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -121,7 +180,7 @@ class LeadCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 35,
-                  backgroundImage: AssetImage(imagePath),
+                  backgroundImage: NetworkImage(imagePath),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -133,7 +192,7 @@ class LeadCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               name,
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           if (verified)
@@ -145,11 +204,11 @@ class LeadCard extends StatelessWidget {
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.3),
                                     blurRadius: 4,
-                                    offset: Offset(0, 4),
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.verified,
                                 color: Colors.blue,
                                 size: 20,
@@ -163,7 +222,7 @@ class LeadCard extends StatelessWidget {
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       LinearPercentIndicator(
-                        barRadius: Radius.circular(10),
+                        barRadius: const Radius.circular(10),
                         lineHeight: 15.0,
                         percent: progress,
                         backgroundColor: Colors.grey.shade300,

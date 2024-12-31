@@ -1,17 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-void main() => runApp(MyApp());
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: MeetDate(),
     );
   }
 }
 
-class MeetDate extends StatelessWidget {
+class MeetDate extends StatefulWidget {
+  const MeetDate({super.key});
+
+  @override
+  State<MeetDate> createState() => _MeetDateState();
+}
+
+class _MeetDateState extends State<MeetDate> {
+  List<Map<String, dynamic>> _meets = [];
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  Future<void> _fetchMeets() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+    final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+
+  if (token == null) {
+    _showSnackBar('Authentication token not found. Please log in again.');
+    return;
+  }
+
+    final url = Uri.parse('http://localhost:8080/api/meets/');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+
+        setState(() {
+          _meets = (responseBody['meets'] as List<dynamic>).map((meet) {
+            return {
+              'client_name': meet['client_name'] ?? '',
+              'phone_num': meet['phone_num'] ?? '',
+              'address': meet['address'] ?? '',
+            };
+          }).toList();
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Failed to load meets. Please try again later.';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An error occurred. Please check your connection.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMeets();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,8 +117,8 @@ class MeetDate extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Text(
+                const SizedBox(width: 10),
+                const Text(
                   'Meet Date',
                   style: TextStyle(
                     color: Colors.black,
@@ -54,19 +126,19 @@ class MeetDate extends StatelessWidget {
                     fontSize: 20,
                   ),
                 ),
-              ]
+              ],
             ),
-            SizedBox(height: 55,),
+            const SizedBox(height: 55),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: _fetchMeets,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               ),
-              child: Text(
+              child: const Text(
                 'Today',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -77,50 +149,34 @@ class MeetDate extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Expanded(
-              child: ListView(
-                children: [
-                 ActivityTile(
-                    icon: Icons.info_outline,
-                    iconColor: Colors.blue,
-                    title: 'Change State',
-                    subtitle: 'By: Welt Joyce',
-                    time: '05:55',
-                  ),
-                  ActivityTile(
-                    icon: Icons.info_outline,
-                    iconColor: Colors.blue,
-                    title: 'Change State',
-                    subtitle: 'By: Welt Joyce',
-                    time: '05:55',
-                  ),
-                 ActivityTile(
-                    icon: Icons.info_outline,
-                    iconColor: Colors.blue,
-                    title: 'Change State',
-                    subtitle: 'By: Welt Joyce',
-                    time: '05:55',
-                  ),
-                  ActivityTile(
-                    icon: Icons.check_circle,
-                    iconColor: Colors.blue,
-                    title: 'Accepted',
-                    subtitle: 'By: Welt Joyce',
-                  ),
-                  ActivityTile(
-                    icon: Icons.info,
-                    iconColor: Colors.grey,
-                    title: 'Created',
-                    subtitle: 'By: Welt Joyce',
-                  ),
-                ],
-              ),
-            ),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage.isNotEmpty
+                    ? Text(_errorMessage)
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: _meets.length,
+                          itemBuilder: (context, index) {
+                            final meet = _meets[index];
+                            return ActivityTile(
+                              icon: Icons.location_on,
+                              iconColor: Colors.green,
+                              title: meet['client_name']!,
+                              subtitle:
+                                  'Phone: ${meet['phone_num']}\nAddress: ${meet['address']}',
+                            );
+                          },
+                        ),
+                      ),
           ],
         ),
       ),
     );
   }
+}
+
+class _showSnackBar {
+  _showSnackBar(String s);
 }
 
 class ActivityTile extends StatelessWidget {
@@ -131,6 +187,7 @@ class ActivityTile extends StatelessWidget {
   final String? time;
 
   const ActivityTile({
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.title,
@@ -141,7 +198,7 @@ class ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
+      margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.white,
@@ -150,7 +207,7 @@ class ActivityTile extends StatelessWidget {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -161,24 +218,15 @@ class ActivityTile extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.bold,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(fontFamily: 'Poppins'),
+          style: const TextStyle(fontFamily: 'Poppins'),
         ),
-        trailing: time != null
-            ? Text(
-                time!,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            : Icon(Icons.arrow_forward_ios),
       ),
     );
   }

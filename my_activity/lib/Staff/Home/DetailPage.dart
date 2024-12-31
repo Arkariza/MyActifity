@@ -13,7 +13,7 @@ class DetailPage extends StatelessWidget {
     String email = decodedToken['email'] ?? 'Email tidak tersedia';
     String username = decodedToken['username'] ?? 'Username tidak tersedia';
     String image = decodedToken['image'] ?? 'assets/images/profile.jpeg';
-    String ID = decodedToken['id'] ?? 'ID tidak tersedia';
+    String id = decodedToken['user_id'] ?? 'ID tidak tersedia';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -122,7 +122,7 @@ class DetailPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditProfile(id: ID),
+                    builder: (context) => EditProfile(id: id),
                   ),
                 );
               },

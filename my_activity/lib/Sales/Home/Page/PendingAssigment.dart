@@ -28,7 +28,6 @@ class _PendingAssignmentState extends State<PendingAssignment> {
     if (token == null) {
       throw Exception('Authentication token not found. Please log in again.');
     }
-
     try {
       final response = await http.get(
         Uri.parse('http://localhost:8080/api/transactions/users'),
@@ -85,10 +84,24 @@ class _PendingAssignmentState extends State<PendingAssignment> {
   }
 
   Future<void> approveLead(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      throw Exception('Authentication token not found. Please log in again.');
+    }
+
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8080/api/acc'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('http://localhost:8080/api/leads/change/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'lead_id': id,
+          'status': 'Open',
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -97,12 +110,13 @@ class _PendingAssignmentState extends State<PendingAssignment> {
         );
         fetchPendingLeads();
       } else {
-        throw Exception('Failed to approve lead');
+        throw Exception('Failed to approve lead. ${response.body}');
       }
     } catch (e) {
       print('Error approving lead: $e');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

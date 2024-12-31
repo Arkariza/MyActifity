@@ -26,45 +26,45 @@ class _AddRefealState extends State<AddRefeal> {
   }
 
   Future<void> fetchAssignToOptions() async {
-  const String apiUrl = "http://localhost:8080/api/users/";
+    const String apiUrl = "http://localhost:8080/api/users/";
 
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
 
-  if (token == null) {
-    return;
-  }
-
-  try {
-    final response = await http.get(
-      Uri.parse(apiUrl),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-
-    if (response.statusCode == 200) {
-      final dynamic data = json.decode(response.body);
-      if (data is List<dynamic>) {
-        setState(() {
-          assignToOptions = data
-              .where((user) => user['role'] == "1")
-              .map((user) {
-                return {
-                  "id": user['_id'], 
-                  "name": user['username'],
-                };
-              })
-              .toList();
-        });
-      } else {
-        print('Unexpected data format: Not a list');
-      }
-    } else {
-      print('Failed to fetch users: ${response.body}');
+    if (token == null) {
+      print("Token is null. User might not be authenticated.");
+      return;
     }
-  } catch (e) {
-    print('Error fetching users: $e');
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic data = json.decode(response.body);
+        if (data is Map<String, dynamic> && data.containsKey('users')) {
+          final List<dynamic> users = data['users'];
+          setState(() {
+            assignToOptions = users
+                .where((user) => user['role'] == 1)
+                .map((user) => {
+                      "username": user['username'] ?? "Unknown",
+                    })
+                .toList();
+          });
+        } else {
+          print(
+              'Unexpected data format: Missing "users" key or invalid structure');
+        }
+      } else {
+        print('Failed to fetch users: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching users: $e');
+    }
   }
-}
 
   Future<void> submitRefeal({
     required String name,
@@ -79,6 +79,7 @@ class _AddRefealState extends State<AddRefeal> {
     final token = prefs.getString('token');
 
     if (token == null) {
+      print("Token is null. Submission cannot proceed.");
       return;
     }
 
@@ -98,7 +99,7 @@ class _AddRefealState extends State<AddRefeal> {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         print('Refeal submitted successfully!');
       } else {
         print('Failed to submit refeal: ${response.body}');
@@ -222,21 +223,24 @@ class _AddRefealState extends State<AddRefeal> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                DropdownButtonFormField<String>(
-                  decoration: getInputDecoration('Select User'),
-                  value: selectedAssignTo,
-                  style: const TextStyle(fontSize: 13, color: Colors.black),
-                  items: assignToOptions.map((user) {
-                    return DropdownMenuItem<String>(
-                      value: user['id'],
-                      child: Text(user['name'], style: const TextStyle(fontSize: 13)),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedAssignTo = newValue;
-                    });
-                  },
+                GestureDetector(
+                  onTap: () => FocusScope.of(context).unfocus(),
+                  child: DropdownButtonFormField<String>(
+                    decoration: getInputDecoration('Select Assign To'),
+                    value: selectedAssignTo,
+                    style: const TextStyle(fontSize: 13, color: Colors.black),
+                    items: assignToOptions.map((user) {
+                      return DropdownMenuItem<String>(
+                        value: user['username'],
+                        child: Text(user['username'] ?? "Unknown"),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedAssignTo = newValue;
+                      });
+                    },
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -272,6 +276,8 @@ class _AddRefealState extends State<AddRefeal> {
                           assignTo: selectedAssignTo!,
                           note: noteController.text,
                         );
+                      } else {
+                        print("All fields must be filled!");
                       }
                     },
                     style: ElevatedButton.styleFrom(
